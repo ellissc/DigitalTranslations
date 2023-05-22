@@ -257,22 +257,34 @@ full.melted.df <- rbind(eng1.eng1,
                         eng4.fre3,
                         eng4.eng4)
 
+full.melted.df <- full.melted.df |> 
+  group_by(x.story) |> 
+  summarize(x.max = max(x.num)) |> 
+  right_join(full.melted.df, by = "x.story") |> 
+  mutate(x.prop = x.num / x.max)
+
+full.melted.df <- full.melted.df |> 
+  group_by(y.story) |> 
+  summarize(y.max = max(y.num)) |> 
+  right_join(full.melted.df, by = "y.story") |> 
+  mutate(y.prop = y.num / y.max)
+
+
 
 ## Plotting ----
+
 
 grid.plot <- full.melted.df |> 
   ggplot(aes(x = x.num, y = y.num, fill = value))+
   geom_tile()+
-  facet_grid(factor(x.story,
+  facet_wrap(factor(x.story,
                     levels = c("eng1","rus2","fre3","eng4"))~factor(y.story,levels = c("eng1","rus2","fre3","eng4")), 
-             scales = "free")+
-  scale_fill_continuous(low = "darkred",
-                        high = "lightblue",
-                        name = "Similarity")+
+             scales = "free", ncol = 4)+
+  scale_fill_distiller(type = "seq",
+                    name = "Similarity")+
   theme_bw()
 
 grid.plot
-## To fix error: discrete value supplied to a continuous scale
 
 ggsave(grid.plot, 
        path = "../figures/",
