@@ -18,7 +18,8 @@ library(jtools)
 # Inputs: preprocessed / split sentences
 #         MBERT embeddings
 # Function: t-SNE and UMAP trajectory plots
-#.          DTW
+#           DTW
+#           Basic LM plot
 
 
 ## Load in the files ----
