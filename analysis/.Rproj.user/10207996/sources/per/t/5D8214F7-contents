@@ -1,0 +1,422 @@
+---
+title: "Digital Translations"
+author: "TylerMarghetis"
+date: "8/20/2022"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.path='plots/', 
+                      echo=T, include=T, results=T, warning=FALSE, 
+                      message=FALSE, tidy=F, cache=T, autodep = T,
+                      fig.width=10, fig.height=6)
+```
+
+```{r libraries, include=FALSE}
+library(tidyverse)
+```
+
+# Load and massage text
+
+Load the texts:
+```{r loadText}
+eng1 <- read_file("../data/txt/English_1_1894.txt")
+rus2 <- read_file("../data/txt/Russian_2_1894.txt")
+fre3 <- read_file("../data/txt/French_3_1895.txt")
+eng4 <- read_file("../data/txt/English_4_1896.txt")
+
+```
+
+Remove carriage returns:
+```{r}
+eng1.1 <- eng1 %>% 
+  str_replace_all("[\r]", replacement = " ") %>% 
+  str_replace_all("[\n]", replacement = " ") %>% 
+  str_replace_all("- ", replacement = "") %>%
+  str_replace_all("  ", replacement = " ") 
+
+rus2.1 <- rus2 %>% 
+  str_replace_all("[\r]", replacement = " ") %>% 
+  str_replace_all("[\n]", replacement = " ") %>% 
+  str_replace_all("- ", replacement = "") %>%
+  str_replace_all("  ", replacement = " ") 
+
+fre3.1 <- fre3 %>% 
+  str_replace_all("[\r]", replacement = " ") %>% 
+  str_replace_all("[\n]", replacement = " ") %>% 
+  str_replace_all("- ", replacement = "") %>%
+  str_replace_all("  ", replacement = " ") 
+
+eng4.1 <- eng4 %>% 
+  str_replace_all("[\r]", replacement = " ") %>% 
+  str_replace_all("[\n]", replacement = " ") %>% 
+  str_replace_all("- ", replacement = "") %>%
+  str_replace_all("  ", replacement = " ") 
+```
+
+Save edited texts:
+```{r}
+write_file(eng1.1, "../data/text_cleaned/English_1_1894.clean.txt")
+write_file(rus2.1, "../data/text_cleaned/Russian_2_1894.clean.txt")
+write_file(fre3.1, "../data/text_cleaned/French_3_1895.clean.txt")
+write_file(eng4.1, "../data/text_cleaned/English_4_1896.clean.txt")
+
+```
+
+# Load and massage clean text files
+
+```{r loadClean}
+eng1.clean <- read_file("../data/text_cleaned/English_1_1894.clean.txt")
+rus2.clean <- read_file("../data/text_cleaned/Russian_2_1894.clean.txt")
+fre3.clean <- read_file("../data/text_cleaned/French_3_1895.clean.txt")
+eng4.clean <- read_file("../data/text_cleaned/English_4_1896.clean.txt")
+```
+
+```{r splitSentences}
+library(tokenizers)
+
+eng1.clean.split <- eng1.clean %>% 
+  tokenize_sentences() %>% 
+  unlist() 
+eng1.clean.split <- tibble(story = 1, lang = "eng", sentences = eng1.clean.split)
+  
+rus2.clean.split <- rus2.clean %>% 
+  tokenize_sentences() %>% 
+  unlist() 
+rus2.clean.split <- tibble(story = 2, lang = "rus", sentences = rus2.clean.split)
+
+fre3.clean.split <- fre3.clean %>% 
+  tokenize_sentences() %>% 
+  unlist() 
+fre3.clean.split <- tibble(story = 3, lang = "fre", sentences = fre3.clean.split)
+
+eng4.clean.split <- eng4.clean %>% 
+  tokenize_sentences() %>% 
+  unlist()
+eng4.clean.split <- tibble(story = 4, lang = "eng", sentences = eng4.clean.split)
+
+all.clean.split <- bind_rows(eng1.clean.split, 
+                             rus2.clean.split, 
+                             fre3.clean.split,
+                             eng4.clean.split) %>% 
+  group_by(story) %>% 
+  mutate(sentence_num = 1:n()) %>% 
+  ungroup()
+
+write_csv(all.clean.split, "../data/text_split/all.clean.split.csv")
+dim(all.clean.split)
+```
+
+##########################
+# Get embeddings
+The USE embeddings are calculated in a Google Colab. 
+
+Load them: 
+```{r}
+all.clean.split <- read_csv("../data/text_split/all.clean.split.csv")
+
+all.clean.split <- all.clean.split %>% 
+  filter(story %in% c(1,2,4)) # don't use French one yet
+
+embeds <- read_csv("../data/embeddings/sentences_embed.csv") %>% 
+  rename_with( ~ paste0("use_", .x)) %>% 
+  mutate(across(use_0:use_511, ~scale(.x, center=T, scale = T)))
+dim(embeds)
+
+
+embeds2 <- all.clean.split %>% 
+  ungroup() %>% 
+  mutate(use_X1 = 0:(n()-1)) %>% 
+  left_join(embeds) %>% 
+  dplyr::select(-use_X1) %>%
+  group_by(story) %>% 
+  mutate(sentence_num = 1:n())
+
+embeds <- embeds %>% dplyr::select(-use_X1)
+```
+
+
+# Visualize
+
+Get sentence similarity:
+```{r sentenceSimilarity}
+library(lsa)
+
+embeds.scaled <- embeds %>% 
+  mutate(across(everything(), function(x) scale(x, center=T, scale=T)))
+embeds.mat <- t(as.matrix(embeds.scaled))
+embeds.cos <- cosine(embeds.mat)
+embeds.cos.mat <- as.matrix(embeds.cos)
+rm(embeds.cos, embeds.mat)
+
+all.clean.split <- all.clean.split %>% 
+  ungroup() %>%
+  mutate(sent_num = 1:n()) 
+
+embeds.cos.df.long <- expand_grid(sent_num1=1:nrow(all.clean.split), 
+                                  sent_num2=1:nrow(all.clean.split))
+
+# Need to do this in a loop because I kept getting a memory error, because of the big matrix I guess. 
+embeds.cos.df.long$cos_sim <- NA
+for(i in 126460:nrow(embeds.cos.df.long)){
+  embeds.cos.df.long$cos_sim[i] <- embeds.cos.mat[embeds.cos.df.long$sent_num1[i],
+                                                  embeds.cos.df.long$sent_num2[i]]
+}
+rm(embeds.cos.mat)
+
+# write_csv(embeds.cos.df.long, "embeds.cos.df.long.csv")
+```
+
+Just load the cosine similarities here, instead of re-running above code:
+```{r}
+embeds.cos.df.long <- read_csv("embeds.cos.df.long.csv")
+embeds.cos.df.long <- embeds.cos.df.long %>% 
+  left_join(dplyr::select(all.clean.split, 
+                          story1 = story, 
+                          lang1 = lang, 
+                          sent_num1 = sent_num)) %>% 
+  left_join(dplyr::select(all.clean.split, 
+                          story2 = story, 
+                          lang2 = lang, 
+                          sent_num2 = sent_num))
+```
+
+Visualize sentence similarity:
+```{r, fig.width=8, fig.height=5}
+embeds.cos.df.long %>% 
+  filter(story1==story2) %>%
+  filter(sent_num1>sent_num2) %>%
+  ggplot(aes(x=cos_sim)) + 
+  geom_histogram() + 
+  facet_wrap(~story1)
+
+```
+
+```{r, fig.width=8, fig.height=5}
+embeds.cos.df.long %>% 
+  filter(story1 == "1", story2 == "1") %>%
+  ggplot(aes(x=sent_num1, y=sent_num2, fill = cos_sim)) +
+  geom_tile() + 
+  scale_fill_gradient2(midpoint=median(embeds.cos.df.long$cos_sim)) +
+  scale_x_continuous(expand=c(0,0)) + 
+  scale_y_continuous(expand=c(0,0)) + 
+  ggtitle("English1 vs itself") + 
+  theme_classic()
+
+embeds.cos.df.long %>% 
+  filter(story1 == "1", story2 == "2") %>%
+  ggplot(aes(x=sent_num1, y=sent_num2, fill = cos_sim)) +
+  geom_tile() + 
+  scale_fill_gradient2(midpoint=median(embeds.cos.df.long$cos_sim)) +
+  scale_x_continuous(expand=c(0,0)) + 
+  scale_y_continuous(expand=c(0,0)) + 
+  theme_classic() + 
+  ggtitle("English1 vs Russian") + 
+  theme(plot.title = element_text(size=20, hjust=.5))
+
+embeds.cos.df.long %>% 
+  filter(story1 == "2", story2 == "4") %>%
+  ggplot(aes(x=sent_num1, y=sent_num2, fill = cos_sim)) +
+  geom_tile() + 
+  scale_fill_gradient2(midpoint=median(embeds.cos.df.long$cos_sim)) +
+  scale_x_continuous(expand=c(0,0)) + 
+  scale_y_continuous(expand=c(0,0)) + 
+  ggtitle("Russian vs English2") + 
+  theme_classic() + 
+  theme(plot.title = element_text(size=20, hjust=.5))
+
+embeds.cos.df.long %>% 
+  filter(story1 == "1", story2 == "4") %>%
+  ggplot(aes(x=sent_num1, y=sent_num2, fill = cos_sim)) +
+  geom_tile() + 
+  scale_fill_gradient2(midpoint=median(embeds.cos.df.long$cos_sim)) +
+  scale_x_continuous(expand=c(0,0)) + 
+  scale_y_continuous(expand=c(0,0)) + 
+  ggtitle("English1 vs English2") + 
+  theme_classic() + 
+  theme(plot.title = element_text(size=20, hjust=.5))
+
+```
+
+```{r tsne}
+library(Rtsne)
+library(dimRed)
+
+set.seed(1234)
+embeds2.tsne <- embeds.scaled %>% 
+  ungroup() %>%
+  dplyr::select(use_0:use_511) %>%
+  # scale() %>%
+  Rtsne(dims=2, pca=FALSE, perplexity=30, theta=0.5, check_duplicates = F)
+
+# Reformat the t-SNE results as a data frame:
+embeds2.tsne_df <- embeds2.tsne$Y %>%
+  as.data.frame() %>%
+  rename(tSNE1 = "V1",
+         tSNE2 = "V2") %>%
+  mutate(ID2 = row_number())
+
+# Rejoin with initial data: 
+embeds3 <- embeds.scaled %>% 
+  ungroup() %>% 
+  mutate(ID2 = row_number()) %>%
+  left_join(embeds2.tsne_df) %>% 
+  dplyr::select(-ID2) %>% 
+  mutate(story = all.clean.split$story, 
+         lang = all.clean.split$lang, 
+         sentences = all.clean.split$sentences, 
+         sent_num = all.clean.split$sent_num) %>% 
+  group_by(story) %>% 
+  mutate(sent_num_within_story = 1:n(),
+         sent_num_within_story_n = sent_num_within_story/n()) %>%
+  dplyr::select(story, lang, sentences, 
+                sent_num, sent_num_within_story, sent_num_within_story_n, 
+                tSNE1, tSNE2, everything())
+
+```
+
+Plot the tSNE timeseries:
+```{r}
+embeds3 %>% 
+  ggplot(aes(x=tSNE1, y = tSNE2, color=factor(story), group=story)) +
+  geom_path() +
+  facet_wrap(~story) + 
+  theme_minimal()
+
+embeds3 %>% 
+  ggplot(aes(x=sent_num_within_story_n, y = tSNE1, color=factor(story), group=story)) +
+  geom_path() +
+  # facet_wrap(~story) + 
+  theme_minimal()
+
+embeds3 %>% 
+  ggplot(aes(x=sent_num_within_story_n, y = tSNE2, color=factor(story), group=story)) +
+  geom_path() +
+  # facet_wrap(~story) + 
+  theme_minimal()
+
+```
+
+Let's smooth things out: 
+```{r}
+library(slider)
+before = 30
+after = 0
+
+xtabs(~story, embeds3)
+
+embeds4 <- embeds3 %>% 
+  group_by(story) %>%
+  # filter(tSNE2 < 10) %>%
+  mutate(across(tSNE1:tSNE2, ~ slide_dbl(.x, ~mean(.x), 
+                                           .before = before, 
+                                           .after = after, 
+                                           .complete = T)))
+
+embeds4 %>% 
+  ggplot(aes(x=tSNE1, y = tSNE2, group=story)) +
+  geom_path(color="grey50", size=1) +
+  geom_point(aes(color=sent_num_within_story_n), size=1) +
+  facet_grid(~story) + 
+  scale_color_gradient2(guide=F, midpoint = .5, mid="grey50") + 
+  scale_alpha(guide=F) + 
+  theme_bw(base_size = 15)
+
+embeds4 %>% 
+  ggplot(aes(x=tSNE1, y = tSNE2, color=as.factor(story), group=story)) +
+  geom_path(size=1) +
+  geom_point(size=1) +
+  scale_color_discrete(guide=F) + 
+  scale_alpha(guide=F) + 
+  theme_bw(base_size = 15)
+```
+
+Let's smooth things out in normalized time: 
+```{r}
+normalized_bin_size = .05
+
+embeds_normalized_smooth <- embeds3 %>% 
+  group_by(story) %>%
+  mutate(sent_num_bin_n = normalized_bin_size * 
+           ceiling((sent_num_within_story_n / normalized_bin_size))) %>%
+  group_by(story, sent_num_bin_n) %>%
+  summarize(across(tSNE1:tSNE2, ~ mean(.x)), 
+            n=n(),
+            .groups="drop")
+
+
+embeds_normalized_smooth %>% 
+  ggplot(aes(x=tSNE1, y = tSNE2, group=story, color=sent_num_bin_n)) +
+  geom_path(size=1) +
+  geom_point(size=2) +
+  facet_grid(~story) + 
+  scale_color_gradient2(guide=F, midpoint = .5, mid="grey50") + 
+  scale_alpha(guide=F) + 
+  theme_bw(base_size = 15)
+
+```
+# TODO: 
+# Dynamic Time Warping (dtw) analysis of story shape.
+# Analyse trajectory complexity. 
+# Analyze affect using sentiment analysis.
+
+# DTW
+
+```{r}
+library(dtw)
+story1 <- embeds4 %>% 
+  ungroup() %>%
+  filter(story == 1) %>% 
+  dplyr::select(starts_with("use_"))
+
+story2 <- embeds4 %>% 
+  ungroup() %>%
+  filter(story == 2) %>% 
+  dplyr::select(starts_with("use_"))
+
+story4 <- embeds4 %>% 
+  ungroup() %>%
+  filter(story == 4) %>% 
+  dplyr::select(starts_with("use_"))
+
+dtw.1.2 <- dtw(x = story1, y = story2)
+dtw.1.4 <- dtw(x = story1, y = story4)
+dtw.2.4 <- dtw(x = story2, y = story4)
+
+dtw.1.2$normalizedDistance
+dtw.1.4$normalizedDistance
+dtw.2.4$normalizedDistance
+```
+
+Using dim-reduced trajectories
+```{r}
+story1.reduced <- embeds_normalized_smooth %>% 
+  ungroup() %>%
+  filter(story == 1) %>% 
+  dplyr::select(starts_with("tSNE"))
+
+story2.reduced <- embeds_normalized_smooth %>% 
+  ungroup() %>%
+  filter(story == 2) %>% 
+  dplyr::select(starts_with("tSNE"))
+
+story4.reduced <- embeds_normalized_smooth %>% 
+  ungroup() %>%
+  filter(story == 4) %>% 
+  dplyr::select(starts_with("tSNE"))
+
+dtw.1.2.reduced <- dtw(x = story1.reduced, y = story2.reduced)
+dtw.1.4.reduced <- dtw(x = story1.reduced, y = story4.reduced)
+dtw.2.4.reduced <- dtw(x = story2.reduced, y = story4.reduced)
+
+dtw.1.2.reduced$normalizedDistance
+dtw.1.4.reduced$normalizedDistance
+dtw.2.4.reduced$normalizedDistance
+```

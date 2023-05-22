@@ -1,0 +1,4 @@
+"0","knitr::opts_chunk$set(fig.path='plots/', "
+"0","                      echo=T, include=T, results=T, warning=FALSE, "
+"0","                      message=FALSE, tidy=F, cache=T, autodep = T,"
+"0","                      fig.width=10, fig.height=6)"
