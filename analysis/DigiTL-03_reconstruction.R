@@ -257,17 +257,24 @@ full.melted.df <- rbind(eng1.eng1,
                         eng4.fre3,
                         eng4.eng4)
 
-full.melted.df <- full.melted.df |> 
-  group_by(x.story) |> 
-  summarize(x.max = max(x.num)) |> 
-  right_join(full.melted.df, by = "x.story") |> 
-  mutate(x.prop = x.num / x.max)
+# full.melted.df <- full.melted.df |> 
+#   group_by(x.story) |> 
+#   summarize(x.max = max(x.num)) |> 
+#   right_join(full.melted.df, by = "x.story") |> 
+#   mutate(x.prop = x.num / x.max)
+# 
+# full.melted.df <- full.melted.df |> 
+#   group_by(y.story) |> 
+#   summarize(y.max = max(y.num)) |> 
+#   right_join(full.melted.df, by = "y.story") |> 
+#   mutate(y.prop = y.num / y.max)
 
 full.melted.df <- full.melted.df |> 
-  group_by(y.story) |> 
-  summarize(y.max = max(y.num)) |> 
-  right_join(full.melted.df, by = "y.story") |> 
-  mutate(y.prop = y.num / y.max)
+  group_by(x.story, y.story) |> 
+  mutate(x.max = max(x.num),
+         y.max = max(y.num),
+         x.num.prop = x.num/x.max,
+         y.num.prop = y.num/y.max)
 
 
 
@@ -347,9 +354,8 @@ chunk_plot <- ggplot(chunk_melted, aes(x = x.num, y = y.num, fill = value))+
   ylab("pred lang")+
   facet_grid2(factor(x.id, levels = grid.levels) ~ factor(y.id, levels = grid.levels),
               strip = strip)+
-  scale_fill_continuous(low = "darkred",
-                        high = "lightblue",
-                        name = "Similarity")+
+  scale_fill_distiller(type = "seq",
+                       name = "Similarity")+
   theme_bw()
   
 chunk_plot
@@ -371,12 +377,7 @@ ggsave(chunk_plot,
 
 ## Story reconstruction ----
 
-full.melted.df <- full.melted.df |> 
-  group_by(x.story, y.story) |> 
-  mutate(x.max = max(x.num),
-         y.max = max(y.num),
-         x.num.prop = x.num/x.max,
-         y.num.prop = y.num/y.max)
+
 
 # Not working fully at the moment?
 # reconstruct_quick <- function(temp_melted){
