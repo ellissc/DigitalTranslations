@@ -1,18 +1,15 @@
 library(tidyverse)
 library(here)
 setwd(here())
-library(tokenizers)
 library(janitor)
 library(Rtsne)
 library(dimRed)
-library(wesanderson)
 library(patchwork)
 library(slider)
 library(lsa)
 library(dtw)
 library(reshape2)
 library(ggrepel)
-library(jtools)
 
 ## What is this script for?
 # Inputs: preprocessed / split sentences
@@ -23,7 +20,7 @@ library(jtools)
 
 
 ## Load in the files ----
-all.clean.split <- read_csv("../data/text_split/all.clean.split_V2.csv",
+all.clean.split <- read_csv("../data/text_split/all.clean.split_VChunk.csv",
                             show_col_type = F)
 
 eng1.clean.split <- all.clean.split |> filter(story == 1)
@@ -71,9 +68,13 @@ all.clean.split_wEmb <- rbind(eng1.clean.split,
                             rus2.clean.split, 
                             fre3.clean.split,
                             eng4.clean.split)
-set.seed(1234)
+
+## Get chunk indexes ----
+# Read in all.clean.split_VChunk instead of all.cl...it_V2, which has the story, chunk, sentence instead of just story, sentence
 
 ## tSNE portion ----
+set.seed(1234)
+
 embeds.tsne <- all.clean.split_wEmb |>
   select(starts_with("x")) |>
   Rtsne(dims = 2, pca = F, perplexity = 30, theta = 0.5, check_duplicates = F)
@@ -92,18 +93,19 @@ embeds3 <- all.clean.split_wEmb |>
   mutate(sent_num.prop = sent_num/n()) |>
   ungroup() |>
   select(story, lang, sentences, sent_num, sent_num.prop, tSNE1, tSNE2, everything())
-# 
-# 
-# # tSNE graphing
-# 
+
+# tSNE graphing ----
+
 embeds3 |>
-  mutate(graph_label = paste(lang, story)) |>
-  ggplot(aes(x=tSNE1, y = tSNE2, color=factor(graph_label), group=graph_label)) +
+  mutate(graph_label = paste(story, lang)) |>
+  ggplot(aes(x=tSNE1, y = tSNE2, color=factor(graph_label), group=graph_label,
+             alpha = sent_num.prop)) +
   geom_path() +
   facet_wrap(~graph_label) +
-  scale_color_manual(values = wes_palette("Darjeeling1"), name = "Story") +
-  theme_minimal() +
-  ggtitle("Story paths")
+  # scale_color_manual(values = wes_palette("Darjeeling1"), name = "Story") +
+  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
+  scale_alpha(guide="none") +
+  theme_bw()
 # 
 # a <- embeds3 |>  
 #   mutate(graph_label = paste(lang, story)) |> 
@@ -200,23 +202,23 @@ umap.embeds <- read_csv("../data/embeddings/karma.umap_embeds.csv", show_col_typ
 
 umap.embeds |>  
   mutate(graph_label = paste(story, lang)) |> 
-  ggplot(aes(x=umap.x, y = umap.y, color=factor(graph_label), group=graph_label)) +
+  ggplot(aes(x=umap.x, y = umap.y, color=factor(graph_label), group=graph_label,
+             alpha = sent_num.prop)) +
   geom_path() +
   facet_wrap(~graph_label) + 
-  scale_color_manual(values = wes_palette("Darjeeling1"), name = "Story") +
-  theme_minimal() +
-  ggtitle("Story paths")
+  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
+  scale_alpha(guide="none") +
+  theme_bw()
 
 a <- umap.embeds |>  
   mutate(graph_label = paste(story, lang)) |> 
   ggplot(aes(x=sent_num.prop, y = umap.x, color=factor(graph_label), 
              group=graph_label)) +
   geom_path() +
-  scale_color_manual(values = c("red", "darkgreen","blue","lightblue"), name = "Story") +
+  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
   theme_minimal() +
-  theme(legend.position = "none")+
-  ggtitle("Story paths", subtitle = "umap.x only")+
-  xlab("Proportional sentence number (within the story)")
+  theme(legend.position = "none",
+        axis.title.x = element_blank())
 
 b <- umap.embeds |>  
   mutate(graph_label = paste(story, lang)) |> 
@@ -224,9 +226,8 @@ b <- umap.embeds |>
              group=graph_label)) +
   geom_path() +
   # facet_wrap(~graph_label) + 
-  scale_color_manual(values = c("red", "darkgreen","blue","lightblue"), name = "Story") +
+  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
   theme_minimal() +
-  ggtitle("Story paths", subtitle = "umap.y only")+
   xlab("Proportional sentence number (within the story)")
 
 a / b
@@ -280,10 +281,22 @@ paths.A <- umap.embeds.4 |>
   scale_shape_manual(values = c(15, 16, 17, 18),
                      name = "Story")+
   scale_alpha(guide="none") +
-  theme_minimal(base_size = 15)+
+  theme_bw(base_size = 15)+
   labs(caption = "Alpha as proportional sentence number")
 
 paths.A
+
+umap.embeds |>  
+  mutate(graph_label = paste(story, lang)) |> 
+  ggplot(aes(x=umap.x, y = umap.y, color= graph_label, 
+             group=graph_label, alpha = chunk_prop_num,
+             shape = graph_label)) +
+  geom_path(size = 0.75) +
+  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
+  scale_alpha(guide="none") +
+  theme_bw(base_size = 15)+
+  labs(caption = "Alpha as proportional sentence number")+
+  facet_wrap(~chunk)
 
 umap.embeds.4 |>  
   mutate(graph_label = paste(story, lang)) |> 
@@ -301,7 +314,7 @@ umap.embeds.4 |>
   scale_shape_manual(values = c(15, 16, 17, 18),
                      name = "Story")+
   scale_alpha(guide="none") +
-  theme_minimal(base_size = 15)+
+  theme_bw(base_size = 15)+
   labs(caption = "Alpha as proportional sentence number")+
   facet_wrap(~graph_label)+
   theme(legend.position = "none")
@@ -486,16 +499,60 @@ ggplot(dtw.df, aes(x = factor(story,
                               levels = c("eng1", "rus2","fre3", "eng4")), 
                    fill = value))+
   geom_tile()+
-  scale_fill_continuous(low = "darkgreen",
-                        high = "lightgreen",
-                        na.value = "transparent",
-                        name = "DTW\ndistance")+
+  scale_fill_distiller(name = "DTW")+
   xlab("Story")+
   ylab("Story")+
   theme_bw()
 
 
-## Plot DTW against translation distance, use color/shape to show that DTW increases as translation distance increases
+## Chunk DTW ----
+
+chunk.dtw <- data.frame()
+for (storyA in 1:4){
+  for (chunkA in 1:5){
+    for (storyB in 1:4){
+      for (chunkB in 1:5){
+        print(paste(storyA, chunkA, storyB, chunkB))
+        subsetA <- umap.embeds |> 
+          filter(story == storyA & chunk == chunkA)|> 
+          select(umap.x, umap.y)
+        
+        subsetB <- umap.embeds |> 
+          filter(story == storyB & chunk == chunkB)|> 
+          select(umap.x, umap.y)
+        
+        comparison <- dtw(subsetA, subsetB, keep = T)
+        
+        distance <- comparison$normalizedDistance
+        
+        new_row <- data.frame(x.story = storyA,
+                              x.chunk = chunkA,
+                              y.story = storyB,
+                              y.chunk = chunkB,
+                              dtw = distance)
+        
+        chunk.dtw <- rbind(chunk.dtw, new_row)
+      }
+    }
+  }
+}
+rm(subsetA, subsetB)
+
+chunk.dtw <- chunk.dtw |> 
+  mutate(x = paste(x.story, x.chunk, sep = "."),
+         y = paste(y.story, y.chunk, sep = "."))
+
+ggplot(chunk.dtw, aes(x = x, y = y, fill = dtw))+
+  geom_tile()+
+  scale_fill_distiller(name = "DTW")+
+  xlab("Story.chunk")+
+  ylab("Story.chunk")+
+  geom_vline(xintercept = c(5.5, 10.5, 15.5))+
+  geom_hline(yintercept = c(5.5, 10.5, 15.5))+
+  theme_bw()
+
+
+## Plot x against translation distance, use color/shape to show that DTW increases as translation distance increases
 
 lm.df <- data.frame(dtw.distance = c(eng1.rus2.distance,
                                      eng1.fre3.distance,
@@ -521,6 +578,38 @@ ggplot(lm.df, aes(x = translation_steps, y = dtw.distance))+
   geom_smooth(method = "lm", se = F, color = "darkblue")+
   geom_point(shape = 21, fill = "lightblue", color = "black")+
   geom_label_repel(aes(label = label), min.segment.length = 0.1)+
+  xlab("Translation steps")+
+  ylab("DTW distance")+
   theme_bw()
 
+
+## Chunk equivalent plot ----
+
+chunk.dtw |> 
+  mutate(general_distance = abs(x.story - y.story) + abs(x.chunk - y.chunk),
+         translation_steps = abs(x.story - y.story),
+         chunk_steps = abs(x.chunk - y.chunk),
+         label = paste(x, y, sep = "-")) |> 
+  ggplot(aes(x = general_distance, y = dtw))+
+  geom_smooth(method = "lm", se = F, color = "darkblue")+
+  geom_point(shape = 21, fill = "lightblue", color = "black")+
+  xlab("General distance\nabs(x.story - y.story) + abs(x.chunk - y.chunk)")+
+  ylab("DTW Distance")+
+  theme_bw()
+
+chunk.dtw |> 
+  mutate(general_distance = abs(x.story - y.story) + abs(x.chunk - y.chunk),
+         translation_steps = abs(x.story - y.story),
+         chunk_steps = abs(x.chunk - y.chunk),
+         label = paste(x, y, sep = "-")) |> 
+  ggplot(aes(x = chunk_steps, y = dtw))+
+  geom_smooth(method = "lm", se = F, color = "darkblue")+
+  geom_point(shape = 21, fill = "lightblue", color = "black")+
+  xlab("Chunk steps")+
+  ylab("DTW Distance")+
+  theme_bw()
+
+
+
+write_csv(chunk.dtw, "../data/processed_data/karma.chunk_dtw.csv")
 
