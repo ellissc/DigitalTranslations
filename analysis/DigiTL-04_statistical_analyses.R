@@ -15,12 +15,17 @@ theme_set(theme_bw() + theme(text =  element_text(size = 14)))
 
 ## Load in the files ----
 chunk_recon_df <- read_csv("../data/processed_data/karma_chunk_reconstruction_df.csv",
-                              show_col_types = F) |> 
-  select(-c(x.max, y.max, x,y,value))
+                              show_col_types = F) 
+
+chunk_dtw <- read_csv("../data/processed_data/karma.chunk_dtw.csv",
+                      show_col_types = F)
 
 reconstruction_df <- read_csv("../data/processed_data/karma_reconstruction_df.csv",
                               show_col_types = F) |> 
   select(-c(x.max, y.max, x,y,value))
+
+chunk_recon_df <- chunk_recon_df |> 
+  left_join(chunk_dtw, by = c("x.story", "x.chunk", "y.story","y.chunk"))
 
 dtw_df <- read_csv("../data/processed_data/karma_dtw_values.csv",
                    show_col_types = F) |> 
@@ -54,7 +59,19 @@ reconstruction_df <- reconstruction_df |>
          pred_diff = num.prop.diff,
          pred_diff.abs = num.prop.diff.abs)
 
-rm(dtw_df)
+## To fix:
+chunk_recon_df <- chunk_recon_df |> 
+  rename(true_lang = x.story,
+         true_order.prop = x.num.prop,
+         true_order = x.num,
+         pred_lang = y.story,
+         pred_order.prop = y.num.prop,
+         pred_order = y.num,
+         similarity = max.sim,
+         pred_diff = num.prop.diff,
+         pred_diff.abs = num.prop.diff.abs)
+
+rm(dtw_df, chunk_dtw)
 gc()
 
 
