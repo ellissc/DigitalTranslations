@@ -59,7 +59,21 @@ eng4.clean.split <- eng4.clean |>
   unlist()
 eng4.clean.split <- tibble(story = 4, lang = "eng", sentences = eng4.clean.split)
 
-## Load in the chunks ----
+
+all.clean.split <- bind_rows(eng1.clean.split, 
+                             rus2.clean.split, 
+                             fre3.clean.split,
+                             eng4.clean.split) |> 
+  group_by(story) |> 
+  mutate(sentence_num = 1:n()) |> 
+  ungroup()
+
+
+## Saving the data ----
+
+write_csv(all.clean.split, "../data/text_split/all.clean.split_V2.csv")
+
+## Chunk version ----
 
 #Eng1
 eng1.1 <- read_file("../data/Karma texts/final.split/English_1_1894.split-1.txt")|> 
@@ -340,6 +354,8 @@ eng4.5 <- tibble(story = 4,
          chunk_prop_num = chunk_sent_num/n())
 
 
+## Combining dfs ----
+
 all.clean.chunk.split <- rbind(eng1.1, eng1.2, eng1.3, eng1.4, eng1.5,
                                rus2.1, rus2.2, rus2.3, rus2.4, rus2.5,
                                fre3.1, fre3.2, fre3.3, fre3.4, fre3.5,
@@ -349,20 +365,96 @@ all.clean.chunk.split <- rbind(eng1.1, eng1.2, eng1.3, eng1.4, eng1.5,
          prop_num = sent_num/n()) |> 
   ungroup()
 
+write_csv(all.clean.chunk.split, "../data/text_split/all.clean.split_VChunk.csv")
 
 
-all.clean.split <- bind_rows(eng1.clean.split, 
-                             rus2.clean.split, 
-                             fre3.clean.split,
-                             eng4.clean.split) |> 
-  group_by(story) |> 
-  mutate(sentence_num = 1:n()) |> 
+## Granularity: groups of 3 sentences, 5 sentences, 10 sentences per row ----
+
+granularize.sentences <- function(grain.size, sentences){
+  combined.sentences <- character(0)
+  for (i in seq(1, length(sentences), by = grain.size)) {
+    end.index <- min(i + grain.size - 1, 
+                     length(sentences))
+    combined.sentences <- c(combined.sentences, 
+                            paste(sentences[i:end.index], 
+                                  collapse = ""))
+  }
+  return(combined.sentences)
+}
+
+eng1.clean.split <- eng1.clean |> 
+  tokenize_sentences() |> 
+  unlist()
+
+eng1.by5 <- data.frame(story = 1, lang = "eng",
+                       sentences = granularize.sentences(5, eng1.clean.split),
+                       grain_size = 5)
+
+eng1.by10 <- data.frame(story = 1, lang = "eng",
+                       sentences = granularize.sentences(10, eng1.clean.split),
+                       grain_size = 10)
+
+eng1.by20 <- data.frame(story = 1, lang = "eng",
+                        sentences = granularize.sentences(20, eng1.clean.split),
+                        grain_size = 20)
+
+rus2.clean.split <- rus2.clean |> 
+  tokenize_sentences() |> 
+  unlist() 
+
+rus2.by5 <- data.frame(story = 2, lang = "rus",
+                       sentences = granularize.sentences(5, rus2.clean.split),
+                       grain_size = 5)
+
+rus2.by10 <- data.frame(story = 2, lang = "rus",
+                        sentences = granularize.sentences(10, rus2.clean.split),
+                        grain_size = 10)
+
+rus2.by20 <- data.frame(story = 2, lang = "rus",
+                        sentences = granularize.sentences(20, rus2.clean.split),
+                        grain_size = 20)
+
+fre3.clean.split <- fre3.clean |> 
+  tokenize_sentences() |> 
+  unlist() 
+
+fre3.by5 <- data.frame(story = 3, lang = "fre",
+                       sentences = granularize.sentences(5, fre3.clean.split),
+                       grain_size = 5)
+
+fre3.by10 <- data.frame(story = 3, lang = "fre",
+                        sentences = granularize.sentences(10, fre3.clean.split),
+                        grain_size = 10)
+
+fre3.by20 <- data.frame(story = 3, lang = "fre",
+                        sentences = granularize.sentences(20, fre3.clean.split),
+                        grain_size = 20)
+
+eng4.clean.split <- eng4.clean |> 
+  tokenize_sentences() |> 
+  unlist()
+
+eng4.by5 <- data.frame(story = 4, lang = "eng",
+                       sentences = granularize.sentences(5, eng4.clean.split),
+                       grain_size = 5)
+
+eng4.by10 <- data.frame(story = 4, lang = "eng",
+                        sentences = granularize.sentences(10, eng4.clean.split),
+                        grain_size = 10)
+
+eng4.by20 <- data.frame(story = 4, lang = "eng",
+                        sentences = granularize.sentences(20, eng4.clean.split),
+                        grain_size = 20)
+
+
+granular.split <- bind_rows(eng1.by5, eng1.by10, eng1.by20,
+                            rus2.by5, rus2.by10, rus2.by20,
+                            fre3.by5, fre3.by10, fre3.by20,
+                            eng4.by5, eng4.by10, eng4.by20) |> 
+  group_by(story, grain_size) |> 
+  mutate(index = 1:n()) |> 
   ungroup()
 
+write_csv(granular.split, "../data/text_split/granular_split.csv")
 
-
-
-write_csv(all.clean.split, "../data/text_split/all.clean.split_V2.csv")
-
-write_csv(all.clean.chunk.split, "../data/text_split/all.clean.split_VChunk.csv")
 
