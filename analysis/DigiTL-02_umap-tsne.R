@@ -286,6 +286,12 @@ paths.A <- umap.embeds.4 |>
 
 paths.A
 
+ggsave(paths.A,
+       filename = here("../figures/karma.umap-normalized.png"),
+       units = "in",
+       dpi = 300,
+       width = 8, height = 7)
+
 umap.embeds |>  
   mutate(graph_label = paste(story, lang)) |> 
   ggplot(aes(x=umap.x, y = umap.y, color= graph_label, 

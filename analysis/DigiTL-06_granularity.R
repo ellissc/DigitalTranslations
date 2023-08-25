@@ -11,206 +11,125 @@ library(dtw)
 library(reshape2)
 library(ggrepel)
 
-## What is this script for?
-# Inputs: preprocessed / split sentences
-#         MBERT embeddings
-# Function: t-SNE and UMAP trajectory plots
-#           DTW
-#           Basic LM plot
+load_granular <- function(grains){
+  ## Load in the files ----
+  all.clean.split <- read_csv("../data/text_split/granular_split.csv",
+                              show_col_type = F)
+  
+  eng1.clean.split <- all.clean.split |> 
+    filter(story == 1 & grain_size == grains)
+  rus2.clean.split <- all.clean.split |> 
+    filter(story == 2 & grain_size == grains)
+  fre3.clean.split <- all.clean.split |> 
+    filter(story == 3 & grain_size == grains)
+  eng4.clean.split <- all.clean.split |> 
+    filter(story == 4 & grain_size == grains)
+  
+  ## M-BERT in Colab ----
+  
+  eng1.embeds <- read_csv(paste0("../data/embeddings/mbert/s1_",
+                                 "g",grains,
+                                 "_embeds_raw.csv"), show_col_type = F) |> 
+    clean_names() |> 
+    mutate(sent_num = 1:n()) 
+  
+  rus2.embeds <- read_csv(paste0("../data/embeddings/mbert/s2_",
+                                 "g",grains,
+                                 "_embeds_raw.csv"), show_col_type = F)|> 
+    clean_names() |> 
+    mutate(sent_num = 1:n()) 
+  
+  fre3.embeds <- read_csv(paste0("../data/embeddings/mbert/s3_",
+                                 "g",grains,
+                                 "_embeds_raw.csv"), show_col_type = F)|> 
+    clean_names() |> 
+    mutate(sent_num = 1:n()) 
+  
+  eng4.embeds <- read_csv(paste0("../data/embeddings/mbert/s4_",
+                                 "g",grains,
+                                 "_embeds_raw.csv"), show_col_type = F)|> 
+    clean_names() |> 
+    mutate(sent_num = 1:n()) 
+  
+  # Join with sentences.
+  eng1.clean.split <- eng1.clean.split |> 
+    mutate(sent_num = 1:n()) |> 
+    left_join(eng1.embeds, by = "sent_num")
+  
+  rus2.clean.split <- rus2.clean.split |> 
+    mutate(sent_num = 1:n()) |> 
+    left_join(rus2.embeds, by = "sent_num")
+  
+  fre3.clean.split <- fre3.clean.split |> 
+    mutate(sent_num = 1:n()) |> 
+    left_join(fre3.embeds, by = "sent_num")
+  
+  eng4.clean.split <- eng4.clean.split |> 
+    mutate(sent_num = 1:n()) |> 
+    left_join(eng4.embeds, by = "sent_num")
+  
+  all.clean.split_wEmb <- rbind(eng1.clean.split, 
+                                rus2.clean.split, 
+                                fre3.clean.split,
+                                eng4.clean.split) |>
+    group_by(story) |>
+    mutate(sent_num.prop = sent_num/n()) |>
+    ungroup()
+  
+  return(all.clean.split_wEmb)
+}
 
 
-## Load in the files ----
-all.clean.split <- read_csv("../data/text_split/all.clean.split_VChunk.csv",
-                            show_col_type = F)
+grains.5 <- load_granular(5)
+grains.10 <- load_granular(10)
+grains.20 <- load_granular(20)
 
-eng1.clean.split <- all.clean.split |> filter(story == 1)
-rus2.clean.split <- all.clean.split |> filter(story == 2)
-fre3.clean.split <- all.clean.split |> filter(story == 3)
-eng4.clean.split <- all.clean.split |> filter(story == 4)
 
-## M-BERT in Colab ----
-
-# https://colab.research.google.com/drive/1HIGBbRT0cJmpujjl7mhkSM-V_WTKgRxo
-
-## Read in M-BERT embeddings ----
-
-eng1.embeds <- read_csv("../data/embeddings/mbert/s1_embeds_raw.csv", show_col_type = F) |> 
-  clean_names() |> 
-  mutate(sent_num = 1:n()) 
-rus2.embeds <- read_csv("../data/embeddings/mbert/s2_embeds_raw.csv", show_col_type = F)|> 
-  clean_names() |> 
-  mutate(sent_num = 1:n()) 
-fre3.embeds <- read_csv("../data/embeddings/mbert/s3_embeds_raw.csv", show_col_type = F)|> 
-  clean_names() |> 
-  mutate(sent_num = 1:n()) 
-eng4.embeds <- read_csv("../data/embeddings/mbert/s4_embeds_raw.csv", show_col_type = F)|> 
-  clean_names() |> 
-  mutate(sent_num = 1:n()) 
-
-# Join with sentences.
-eng1.clean.split <- eng1.clean.split |> 
-  mutate(sent_num = 1:n()) |> 
-  left_join(eng1.embeds, by = "sent_num")
-
-rus2.clean.split <- rus2.clean.split |> 
-  mutate(sent_num = 1:n()) |> 
-  left_join(rus2.embeds, by = "sent_num")
-
-fre3.clean.split <- fre3.clean.split |> 
-  mutate(sent_num = 1:n()) |> 
-  left_join(fre3.embeds, by = "sent_num")
-
-eng4.clean.split <- eng4.clean.split |> 
-  mutate(sent_num = 1:n()) |> 
-  left_join(eng4.embeds, by = "sent_num")
-
-all.clean.split_wEmb <- rbind(eng1.clean.split, 
-                            rus2.clean.split, 
-                            fre3.clean.split,
-                            eng4.clean.split)
-
-## Get chunk indexes ----
-# Read in all.clean.split_VChunk instead of all.cl...it_V2, which has the story, chunk, sentence instead of just story, sentence
 
 ## tSNE portion ----
-set.seed(1234)
+# set.seed(1234)
+# 
+# embeds.tsne <- all.clean.split_wEmb |>
+#   select(starts_with("x")) |>
+#   Rtsne(dims = 2, pca = F, perplexity = 10, 
+#         theta = 0.5, check_duplicates = F)
 
-embeds.tsne <- all.clean.split_wEmb |>
-  select(starts_with("x")) |>
-  Rtsne(dims = 2, pca = F, perplexity = 30, theta = 0.5, check_duplicates = F)
-
-embeds.tsne_df <- embeds.tsne$Y |>
-  as.data.frame() |>
-  rename(tSNE1 = "V1", tSNE2 = "V2") |>
-  mutate(ID2 = row_number())
-
-
-embeds3 <- all.clean.split_wEmb |>
-  mutate(ID2 = row_number()) |>
-  left_join(embeds.tsne_df, by = "ID2") |>
-  select(-ID2) |>
-  group_by(story) |>
-  mutate(sent_num.prop = sent_num/n()) |>
-  ungroup() |>
-  select(story, lang, sentences, sent_num, sent_num.prop, tSNE1, tSNE2, everything())
-
-# tSNE graphing ----
-
-embeds3 |>
-  mutate(graph_label = paste(story, lang)) |>
-  ggplot(aes(x=tSNE1, y = tSNE2, color=factor(graph_label), group=graph_label,
-             alpha = sent_num.prop)) +
-  geom_path() +
-  facet_wrap(~graph_label) +
-  # scale_color_manual(values = wes_palette("Darjeeling1"), name = "Story") +
-  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
-  scale_alpha(guide="none") +
-  theme_bw()
-# 
-# a <- embeds3 |>  
-#   mutate(graph_label = paste(lang, story)) |> 
-#   ggplot(aes(x=sent_num.prop, y = tSNE1, color=factor(graph_label), 
-#              group=graph_label)) +
-#   geom_path() +
-#   # facet_wrap(~graph_label) + 
-#   scale_color_manual(values = wes_palette("Darjeeling1"), name = "Story") +
-#   theme_minimal() +
-#   theme(legend.position = "none")+
-#   ggtitle("Story paths", subtitle = "tSNE1 only")+
-#   xlab("Proportional sentence number (within the story)")
-# 
-# b <- embeds3 |>  
-#   mutate(graph_label = paste(lang, story)) |> 
-#   ggplot(aes(x=sent_num.prop, y = tSNE2, color=factor(graph_label), 
-#              group=graph_label)) +
-#   geom_path() +
-#   # facet_wrap(~graph_label) + 
-#   scale_color_manual(values = wes_palette("Darjeeling1"), name = "Story") +
-#   theme_minimal() +
-#   ggtitle("Story paths", subtitle = "tSNE2 only")+
-#   xlab("Proportional sentence number (within the story)")
-# 
-# a / b
-# 
-# 
-# ## Smoothing ----
-# before = 30
-# after = 0
-# 
-# xtabs(~story, embeds3)
-# 
-# embeds4 <- embeds3 |>  
-#   group_by(story) |> 
-#   mutate(across(tSNE1:tSNE2, ~ slide_dbl(.x, ~mean(.x), 
-#                                          .before = before, 
-#                                          .after = after, 
-#                                          .complete = T)))
-# 
-# paths.1 <- embeds4 |>  
-#   mutate(graph_label = paste(story, lang)) |> 
-#   ggplot(aes(x=tSNE1, y = tSNE2, group=graph_label)) +
-#   geom_path(color="grey50", size=1) +
-#   geom_point(aes(color=sent_num), size=1) +
-#   facet_grid(~graph_label) + 
-#   scale_color_gradient2(guide='none', midpoint = .5, mid="grey50") + 
-#   scale_alpha(guide=F) + 
-#   theme_bw(base_size = 15)
-# 
-# paths.A <- embeds4 |>  
-#   mutate(graph_label = paste(story, lang)) |> 
-#   ggplot(aes(x=tSNE1, y = tSNE2, color=as.factor(story), group=graph_label)) +
-#   geom_path(size=1) +
-#   geom_point(size=1) +
-#   scale_color_discrete(guide="none") + 
-#   scale_alpha(guide="none") + 
-#   theme_bw(base_size = 15)
-# 
-# paths.1 + paths.A
-# 
-# 
-# # Normalized smoothing
-# 
-# normalized_bin_size = .05
-# 
-# embeds_normalized_smooth <- embeds3 |>  
-#   group_by(story) |> 
-#   mutate(sent_num_bin_n = normalized_bin_size * 
-#            ceiling((sent_num / normalized_bin_size))) %>%
-#   group_by(story, sent_num_bin_n) %>%
-#   summarize(across(tSNE1:tSNE2, ~ mean(.x)), 
-#             n=n(),
-#             .groups="drop")
-# 
-# 
-# embeds_normalized_smooth |>  
-#   ggplot(aes(x=tSNE1, y = tSNE2, group=story, color=sent_num_bin_n)) +
-#   geom_path(size=1) +
-#   geom_point(size=2) +
-#   facet_grid(~story) + 
-#   scale_color_gradient2(guide=F, midpoint = .5, mid="grey50") + 
-#   scale_alpha(guide=F) + 
-#   theme_bw(base_size = 15)
+# embeds.tsne_df <- embeds.tsne$Y |>
+#   as.data.frame() |>
+#   rename(tSNE1 = "V1", tSNE2 = "V2") |>
+#   mutate(ID2 = row_number())
 
 
+# embeds3 <- all.clean.split_wEmb |>
+#   mutate(ID2 = row_number()) |>
+#   left_join(embeds.tsne_df, by = "ID2") |>
+#   select(-ID2) |>
+#   group_by(story) |>
+#   mutate(sent_num.prop = sent_num/n()) |>
+#   ungroup() |>
+#   select(story, lang, sentences, sent_num, sent_num.prop, tSNE1, tSNE2, everything())
 
 
-## UMAP part ----
+## UMAP, 5 grains ----
 
-umap.embeds <- read_csv("../data/embeddings/karma.umap_embeds.csv", show_col_type = F) |> 
+umap.embeds.5 <- read_csv(paste0("../data/embeddings/karma.g",5,
+                               ".umap_embeds.csv"), 
+                        show_col_type = F) |> 
   select(-story) |> 
-  cbind(embeds3 |> select(-c(starts_with("x"))))
+  cbind(grains.5 |> select(-c(starts_with("x"))))
 
-umap.embeds |>  
-  mutate(graph_label = paste(story, lang)) |> 
-  ggplot(aes(x=umap.x, y = umap.y, color=factor(graph_label), group=graph_label,
-             alpha = sent_num.prop)) +
-  geom_path() +
-  facet_wrap(~graph_label) + 
-  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
-  scale_alpha(guide="none") +
-  theme_bw()
+# umap.embeds.5 |>  
+#   mutate(graph_label = paste(story, lang)) |> 
+#   ggplot(aes(x=umap.x, y = umap.y, 
+#              color=factor(graph_label), group=graph_label,
+#              alpha = sent_num.prop)) +
+#   geom_path() +
+#   facet_wrap(~graph_label) + 
+#   scale_color_brewer(type = "qual", palette = 3, name = "Story")+
+#   # scale_alpha(guide="none") +
+#   theme_bw()
 
-a <- umap.embeds |>  
+a <- umap.embeds.5 |>  
   mutate(graph_label = paste(story, lang)) |> 
   ggplot(aes(x=sent_num.prop, y = umap.x, color=factor(graph_label), 
              group=graph_label)) +
@@ -220,7 +139,7 @@ a <- umap.embeds |>
   theme(legend.position = "none",
         axis.title.x = element_blank())
 
-b <- umap.embeds |>  
+b <- umap.embeds.5 |>  
   mutate(graph_label = paste(story, lang)) |> 
   ggplot(aes(x=sent_num.prop, y = umap.y, color=factor(graph_label), 
              group=graph_label)) +
@@ -230,75 +149,41 @@ b <- umap.embeds |>
   theme_minimal() +
   xlab("Proportional sentence number (within the story)")
 
-a / b
+ggsave(a / b,
+       filename = here("../figures/karma.split-umap-trajectory.g5.png"),
+       units = "in",
+       dpi = 300,
+       width = 6, height = 4)
 
+umap.embeds.5 |>  
+  mutate(graph_label = paste(story, lang)) |> 
+  ggplot(aes(x=umap.x, y = umap.y, color=sent_num.prop)) +
+  geom_point(color = "black")+
+  geom_path(size = 1)+
+  facet_wrap(~graph_label)+
+  scale_color_distiller(type = "div", palette = 4, 
+                        name = "Sentence\nnumber")+
+  theme_bw()+
+  ggtitle("Story trajectories, grain size = 5 sentences")
 
-## UMAP: Smoothing ----
-before = 30
+## UMAP: Smoothing
+before = 1
 after = 0
 
-xtabs(~story, umap.embeds)
+xtabs(~story, umap.embeds.5)
 
-umap.embeds.4 <- umap.embeds |>  
+umap.normalized.5 <- umap.embeds.5 |>  
   group_by(story) |> 
   mutate(across(umap.x:umap.y, ~ slide_dbl(.x, ~mean(.x), 
                                          .before = before, 
                                          .after = after, 
                                          .complete = T)))
 
-paths.1 <- umap.embeds.4 |>  
-  mutate(graph_label = paste(story, lang)) |> 
-  ggplot(aes(x=umap.x, y = umap.y, group=graph_label)) +
-  geom_path(color="grey50", linewidth =1) +
-  geom_point(aes(color=factor(sent_num.prop)), size=2) +
-  facet_grid(~graph_label) + 
-  # scale_color_gradient2(guide='none', midpoint = .5, mid="grey50") + 
-  scale_color_brewer(type = "qual", palette = 3)+
-  scale_alpha(guide=F) + 
-  theme_bw(base_size = 15)+
-  ggtitle("UMAP story paths")+
-  theme(legend.position = "none")
-
-paths.1
-
-umap.extremes <- umap.embeds.4 |> 
+umap.extremes <- umap.normalized.5 |> 
   filter(sent_num == 31 | sent_num.prop == 1) |>  
   mutate(graph_label = paste(story, lang)) 
 
-paths.A <- umap.embeds.4 |>  
-  mutate(graph_label = paste(story, lang)) |> 
-  ggplot(aes(x=umap.x, y = umap.y, color= graph_label, 
-             group=graph_label, alpha = sent_num.prop,
-             shape = graph_label)) +
-  geom_path(size = 0.75) +
-  geom_point(data = umap.extremes, aes(x=umap.x, y = umap.y,
-                                       color= graph_label, 
-                                       group=graph_label, 
-                                       alpha = sent_num.prop,
-                                       shape = graph_label),
-             size = 5) +
-  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
-  scale_shape_manual(values = c(15, 16, 17, 18),
-                     name = "Story")+
-  scale_alpha(guide="none") +
-  theme_bw(base_size = 15)+
-  labs(caption = "Alpha as proportional sentence number")
-
-paths.A
-
-umap.embeds |>  
-  mutate(graph_label = paste(story, lang)) |> 
-  ggplot(aes(x=umap.x, y = umap.y, color= graph_label, 
-             group=graph_label, alpha = chunk_prop_num,
-             shape = graph_label)) +
-  geom_path(size = 0.75) +
-  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
-  scale_alpha(guide="none") +
-  theme_bw(base_size = 15)+
-  labs(caption = "Alpha as proportional sentence number")+
-  facet_wrap(~chunk)
-
-umap.embeds.4 |>  
+paths.A <- umap.normalized.5 |>  
   mutate(graph_label = paste(story, lang)) |> 
   ggplot(aes(x=umap.x, y = umap.y, color= graph_label, 
              group=graph_label, alpha = sent_num.prop,
@@ -316,184 +201,375 @@ umap.embeds.4 |>
   scale_alpha(guide="none") +
   theme_bw(base_size = 15)+
   labs(caption = "Alpha as proportional sentence number")+
+  ggtitle("Overlaid normalized paths, grain size of 5")
+
+ggsave(paths.A,
+       filename = here("../figures/karma.umap-normalized.g5.png"),
+       units = "in",
+       dpi = 300,
+       width = 8, height = 7)
+
+## 10 grain size ----
+
+umap.embeds.10 <- read_csv(paste0("../data/embeddings/karma.g",10,
+                                 ".umap_embeds.csv"), 
+                          show_col_type = F) |> 
+  select(-story) |> 
+  cbind(grains.10 |> select(-c(starts_with("x"))))
+
+
+a <- umap.embeds.10 |>  
+  mutate(graph_label = paste(story, lang)) |> 
+  ggplot(aes(x=sent_num.prop, y = umap.x, color=factor(graph_label), 
+             group=graph_label)) +
+  geom_path() +
+  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.title.x = element_blank())
+
+b <- umap.embeds.10 |>  
+  mutate(graph_label = paste(story, lang)) |> 
+  ggplot(aes(x=sent_num.prop, y = umap.y, color=factor(graph_label), 
+             group=graph_label)) +
+  geom_path() +
+  # facet_wrap(~graph_label) + 
+  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
+  theme_minimal() +
+  xlab("Proportional sentence number (within the story)")
+
+ggsave(a / b,
+       filename = here("../figures/karma.split-umap-trajectory.g10.png"),
+       units = "in",
+       dpi = 300,
+       width = 6, height = 4)
+
+umap.embeds.10 |>  
+  mutate(graph_label = paste(story, lang)) |> 
+  ggplot(aes(x=umap.x, y = umap.y, color=sent_num.prop)) +
+  geom_point(color = "black")+
+  geom_path(size = 1)+
   facet_wrap(~graph_label)+
-  theme(legend.position = "none")
+  scale_color_distiller(type = "div", palette = 4, 
+                        name = "Sentence\nnumber")+
+  theme_bw()+
+  ggtitle("Story trajectories, grain size = 10 sentences")
 
+## UMAP: Smoothing
+before = 1
+after = 0
 
-# Normalized smoothing
+xtabs(~story, umap.embeds.10)
 
-normalized_bin_size = .05
-
-embeds_normalized_smooth <- umap.embeds |>  
+umap.normalized.10 <- umap.embeds.10 |>  
   group_by(story) |> 
-  mutate(sent_num_bin_n = normalized_bin_size * 
-           ceiling((sent_num / normalized_bin_size))) %>%
-  group_by(story, sent_num_bin_n) %>%
-  summarize(across(umap.x:umap.y, ~ mean(.x)), 
-            n=n(),
-            .groups="drop")
+  mutate(across(umap.x:umap.y, ~ slide_dbl(.x, ~mean(.x), 
+                                           .before = before, 
+                                           .after = after, 
+                                           .complete = T)))
 
+umap.extremes <- umap.normalized.10 |> 
+  filter(sent_num == 31 | sent_num.prop == 1) |>  
+  mutate(graph_label = paste(story, lang)) 
 
-# embeds_normalized_smooth |>  
-#   ggplot(aes(x=umap.x, y = umap.y, color= story, 
-#              group=story, 
-#              alpha = as.numeric(sent_num.prop))) +
-#   geom_path(size=1) +
-#   # geom_point() +
-#   scale_color_brewer(type = "qual", palette = 3, name = "Story")+
-#   # scale_shape_manual(values = c(21, 23, 24, 22), 
-#   # name = "Story")+
-#   # scale_alpha(guide="none") + 
-#   theme_bw(base_size = 15)+
-#   ggtitle("Overlayed story paths")
+paths.A <- umap.normalized.10 |>  
+  mutate(graph_label = paste(story, lang)) |> 
+  ggplot(aes(x=umap.x, y = umap.y, color= graph_label, 
+             group=graph_label, alpha = sent_num.prop,
+             shape = graph_label)) +
+  geom_path(size = 0.75) +
+  geom_point(data = umap.extremes, aes(x=umap.x, y = umap.y,
+                                       color= graph_label, 
+                                       group=graph_label, 
+                                       alpha = sent_num.prop,
+                                       shape = graph_label),
+             size = 5) +
+  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
+  scale_shape_manual(values = c(15, 16, 17, 18),
+                     name = "Story")+
+  scale_alpha(guide="none") +
+  theme_bw(base_size = 15)+
+  labs(caption = "Alpha as proportional sentence number")+
+  ggtitle("Overlaid normalized paths, grain size of 10")
 
+ggsave(paths.A,
+       filename = here("../figures/karma.umap-normalized.g10.png"),
+       units = "in",
+       dpi = 300,
+       width = 8, height = 7)
+
+## 20 grain size ----
+
+umap.embeds.20 <- read_csv(paste0("../data/embeddings/karma.g",20,
+                                  ".umap_embeds.csv"), 
+                           show_col_type = F) |> 
+  select(-story) |> 
+  cbind(grains.20 |> select(-c(starts_with("x"))))
+
+a <- umap.embeds.20 |>  
+  mutate(graph_label = paste(story, lang)) |> 
+  ggplot(aes(x=sent_num.prop, y = umap.x, color=factor(graph_label), 
+             group=graph_label)) +
+  geom_path() +
+  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.title.x = element_blank())
+
+b <- umap.embeds.20 |>  
+  mutate(graph_label = paste(story, lang)) |> 
+  ggplot(aes(x=sent_num.prop, y = umap.y, color=factor(graph_label), 
+             group=graph_label)) +
+  geom_path() +
+  # facet_wrap(~graph_label) + 
+  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
+  theme_minimal() +
+  xlab("Proportional sentence number (within the story)")
+
+ggsave(a / b,
+       filename = here("../figures/karma.split-umap-trajectory.g20.png"),
+       units = "in",
+       dpi = 300,
+       width = 6, height = 4)
+
+umap.embeds.20 |>  
+  mutate(graph_label = paste(story, lang)) |> 
+  ggplot(aes(x=umap.x, y = umap.y, color=sent_num.prop)) +
+  geom_point(color = "black")+
+  geom_path(size = 1)+
+  facet_wrap(~graph_label)+
+  scale_color_distiller(type = "div", palette = 4, 
+                        name = "Sentence\nnumber")+
+  theme_bw()+
+  ggtitle("Story trajectories, grain size = 20 sentences")
+
+## UMAP: Smoothing
+before = 1
+after = 0
+
+xtabs(~story, umap.embeds.20)
+
+umap.normalized.20 <- umap.embeds.20 |>  
+  group_by(story) |> 
+  mutate(across(umap.x:umap.y, ~ slide_dbl(.x, ~mean(.x), 
+                                           .before = before, 
+                                           .after = after, 
+                                           .complete = T)))
+
+umap.extremes <- umap.normalized.20 |> 
+  filter(sent_num == 31 | sent_num.prop == 1) |>  
+  mutate(graph_label = paste(story, lang)) 
+
+paths.A <- umap.normalized.20 |>  
+  mutate(graph_label = paste(story, lang)) |> 
+  ggplot(aes(x=umap.x, y = umap.y, color= graph_label, 
+             group=graph_label, alpha = sent_num.prop,
+             shape = graph_label)) +
+  geom_path(size = 0.75) +
+  geom_point(data = umap.extremes, aes(x=umap.x, y = umap.y,
+                                       color= graph_label, 
+                                       group=graph_label, 
+                                       alpha = sent_num.prop,
+                                       shape = graph_label),
+             size = 5) +
+  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
+  scale_shape_manual(values = c(15, 16, 17, 18),
+                     name = "Story")+
+  scale_alpha(guide="none") +
+  theme_bw(base_size = 15)+
+  labs(caption = "Alpha as proportional sentence number")+
+  ggtitle("Overlaid normalized paths, grain size of 20")
+
+ggsave(paths.A,
+       filename = here("../figures/karma.umap-normalized.g20.png"),
+       units = "in",
+       dpi = 300,
+       width = 8, height = 7)
 
 ## DTW ----
 
-umap.embeds |> colnames()
+dtw_analysis <- function(umap.embeds, grains){
+  
+  ## ENG1, RUS2 ----
+  eng1.rus2 <- dtw(umap.embeds |> filter(story == 1) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == 2) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  eng1.rus2.distance <- eng1.rus2$normalizedDistance
+  
+  ## ENG1, FRE3 ----
+  eng1.fre3 <- dtw(umap.embeds |> filter(story == 1) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == 3) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  eng1.fre3.distance <- eng1.fre3$normalizedDistance
+  
+  ## ENG1, ENG4 ----
+  eng1.eng4 <- dtw(umap.embeds |> filter(story == 1) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == 4) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  eng1.eng4.distance <- eng1.eng4$normalizedDistance
+  
+  ## RUS2, ENG1 ----
+  
+  rus2.eng1 <- dtw(umap.embeds |> filter(story == 2) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == 1) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  rus2.eng1.distance <- rus2.eng1$normalizedDistance
+  
+  ## RUS2, FRE3 ----
+  
+  rus2.fre3 <- dtw(umap.embeds |> filter(story == 2) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == 3) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  rus2.fre3.distance <- rus2.fre3$normalizedDistance
+  
+  ## RUS2, ENG4 ----
+  
+  rus2.eng4 <- dtw(umap.embeds |> filter(story == 2) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == 4) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  rus2.eng4.distance <- rus2.eng4$normalizedDistance
+  
+  ## FRE3, ENG1 ----
+  fre3.eng1 <- dtw(umap.embeds |> filter(story == 3) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == 1) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  fre3.eng1.distance <- fre3.eng1$normalizedDistance
+  
+  ## FRE3, RUS2 ----
+  fre3.rus2 <- dtw(umap.embeds |> filter(story == 3) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == 2) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  fre3.rus2.distance <- fre3.rus2$normalizedDistance
+  
+  ## FRE3, ENG4 ----
+  fre3.eng4 <- dtw(umap.embeds |> filter(story == 3) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == 4) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  fre3.eng4.distance <- fre3.eng4$normalizedDistance
+  
+  ## ENG4, RUS2 ----
+  eng4.rus2 <- dtw(umap.embeds |> filter(story == 4) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == 2) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  eng4.rus2.distance <- eng4.rus2$normalizedDistance
+  
+  ## ENG4, FRE3 ----
+  eng4.fre3 <- dtw(umap.embeds |> filter(story == 4) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == 3) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  eng4.fre3.distance <- eng4.fre3$normalizedDistance
+  
+  ## ENG4, ENG1 ----
+  eng4.eng1 <- dtw(umap.embeds |> filter(story == 4) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == 1) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  eng4.eng1.distance <- eng4.eng1$normalizedDistance
+  
+  eng1.eng1 <- dtw(umap.embeds |> filter(story == 1) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == 1) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  eng1.eng1.distance <- eng1.eng1$normalizedDistance
+  
+  rus2.rus2 <- dtw(umap.embeds |> filter(story == 2) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == 2) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  rus2.rus2.distance <- rus2.rus2$normalizedDistance
+  
+  fre3.fre3 <- dtw(umap.embeds |> filter(story == 3) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == 3) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  fre3.fre3.distance <- fre3.fre3$normalizedDistance
+  
+  eng4.eng4 <- dtw(umap.embeds |> filter(story == 4) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == 4) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  eng4.eng4.distance <- eng4.eng4$normalizedDistance
+  
+  ## Final heatmap ----
+  
+  
+  
+  dtw.df <- data.frame(story = c("eng1", "rus2","fre3", "eng4"),
+                       eng1 = c(eng1.eng1.distance, rus2.eng1.distance,
+                                fre3.eng1.distance, eng4.eng1.distance),
+                       rus2 = c(eng1.rus2.distance, rus2.rus2.distance,
+                                fre3.rus2.distance, eng4.rus2.distance),
+                       fre3 = c(eng1.fre3.distance, rus2.fre3.distance,
+                                fre3.fre3.distance, eng4.fre3.distance),
+                       eng4 = c(eng1.eng4.distance, rus2.eng4.distance,
+                                fre3.eng4.distance, eng4.eng4.distance)) |> 
+    melt() |> 
+    mutate(grains = grains)
+  
+  return(dtw.df)
+}
+
+dtw.1 <- read_csv(here("../data/processed_data/karma_dtw_values.csv"), show_col_types = F) |> 
+  mutate(grains = 1)
+dtw.5 <- dtw_analysis(umap.embeds.5, 5)
+dtw.10 <- dtw_analysis(umap.embeds.10, 10)
+dtw.20 <- dtw_analysis(umap.embeds.20, 20)
+
+dtw.all <- rbind(dtw.1,
+                 dtw.5, 
+                 dtw.10,
+                 dtw.20) |> 
+  mutate(story_pair = paste(story, variable, sep = "."))
+
+dtw.full.plot <- ggplot(dtw.all, aes(x = grains, y = value, 
+                    color = story, shape = variable))+
+  geom_point(size = 2, position = position_jitter(width = 0.5))+
+  scale_color_brewer(type = "qual", palette = 3, name = "Story1")+
+  scale_shape_manual(name = "Story2", values = c(15, 22, 16, 17))+
+  theme_bw()+
+  xlab("Grain size (sentences per group)")+
+  ylab("DTW")+
+  ggtitle("Relationship between grain size and DTW")+
+  geom_smooth(data = dtw.all |> filter(story != variable),
+              aes(x = grains, y = value, 
+                  color = story, group = story),
+              se = F)
+
+ggsave(dtw.full.plot,
+       filename = here("../figures/karma.dtw-grainsize.png"),
+       units = "in",
+       dpi = 300,
+       width = 11, height = 7)
 
 
-## ENG1, RUS2 ----
-eng1.rus2 <- dtw(umap.embeds |> filter(story == 1) |> 
-                   select(umap.x, umap.y),
-                 umap.embeds |> filter(story == 2) |> 
-                   select(umap.x, umap.y),
-                 keep = TRUE)
-eng1.rus2.distance <- eng1.rus2$normalizedDistance
-
-## ENG1, FRE3 ----
-eng1.fre3 <- dtw(umap.embeds |> filter(story == 1) |> 
-                   select(umap.x, umap.y),
-                 umap.embeds |> filter(story == 3) |> 
-                   select(umap.x, umap.y),
-                 keep = TRUE)
-eng1.fre3.distance <- eng1.fre3$normalizedDistance
-
-## ENG1, ENG4 ----
-eng1.eng4 <- dtw(umap.embeds |> filter(story == 1) |> 
-                   select(umap.x, umap.y),
-                 umap.embeds |> filter(story == 4) |> 
-                   select(umap.x, umap.y),
-                 keep = TRUE)
-eng1.eng4.distance <- eng1.eng4$normalizedDistance
-
-## RUS2, ENG1 ----
-
-rus2.eng1 <- dtw(umap.embeds |> filter(story == 2) |> 
-                   select(umap.x, umap.y),
-                 umap.embeds |> filter(story == 1) |> 
-                   select(umap.x, umap.y),
-                 keep = TRUE)
-rus2.eng1.distance <- rus2.eng1$normalizedDistance
-
-## RUS2, FRE3 ----
-
-rus2.fre3 <- dtw(umap.embeds |> filter(story == 2) |> 
-                   select(umap.x, umap.y),
-                 umap.embeds |> filter(story == 3) |> 
-                   select(umap.x, umap.y),
-                 keep = TRUE)
-rus2.fre3.distance <- rus2.fre3$normalizedDistance
-
-## RUS2, ENG4 ----
-
-rus2.eng4 <- dtw(umap.embeds |> filter(story == 2) |> 
-                   select(umap.x, umap.y),
-                 umap.embeds |> filter(story == 4) |> 
-                   select(umap.x, umap.y),
-                 keep = TRUE)
-rus2.eng4.distance <- rus2.eng4$normalizedDistance
-
-## FRE3, ENG1 ----
-fre3.eng1 <- dtw(umap.embeds |> filter(story == 3) |> 
-                   select(umap.x, umap.y),
-                 umap.embeds |> filter(story == 1) |> 
-                   select(umap.x, umap.y),
-                 keep = TRUE)
-fre3.eng1.distance <- fre3.eng1$normalizedDistance
-
-## FRE3, RUS2 ----
-fre3.rus2 <- dtw(umap.embeds |> filter(story == 3) |> 
-                   select(umap.x, umap.y),
-                 umap.embeds |> filter(story == 2) |> 
-                   select(umap.x, umap.y),
-                 keep = TRUE)
-fre3.rus2.distance <- fre3.rus2$normalizedDistance
-
-## FRE3, ENG4 ----
-fre3.eng4 <- dtw(umap.embeds |> filter(story == 3) |> 
-                   select(umap.x, umap.y),
-                 umap.embeds |> filter(story == 4) |> 
-                   select(umap.x, umap.y),
-                 keep = TRUE)
-fre3.eng4.distance <- fre3.eng4$normalizedDistance
-
-## ENG4, RUS2 ----
-eng4.rus2 <- dtw(umap.embeds |> filter(story == 4) |> 
-                   select(umap.x, umap.y),
-                 umap.embeds |> filter(story == 2) |> 
-                   select(umap.x, umap.y),
-                 keep = TRUE)
-eng4.rus2.distance <- eng4.rus2$normalizedDistance
-
-## ENG4, FRE3 ----
-eng4.fre3 <- dtw(umap.embeds |> filter(story == 4) |> 
-                   select(umap.x, umap.y),
-                 umap.embeds |> filter(story == 3) |> 
-                   select(umap.x, umap.y),
-                 keep = TRUE)
-eng4.fre3.distance <- eng4.fre3$normalizedDistance
-
-## ENG4, ENG1 ----
-eng4.eng1 <- dtw(umap.embeds |> filter(story == 4) |> 
-                   select(umap.x, umap.y),
-                 umap.embeds |> filter(story == 1) |> 
-                   select(umap.x, umap.y),
-                 keep = TRUE)
-eng4.eng1.distance <- eng4.eng1$normalizedDistance
-
-eng1.eng1 <- dtw(umap.embeds |> filter(story == 1) |> 
-                   select(umap.x, umap.y),
-                 umap.embeds |> filter(story == 1) |> 
-                   select(umap.x, umap.y),
-                 keep = TRUE)
-eng1.eng1.distance <- eng1.eng1$normalizedDistance
-
-rus2.rus2 <- dtw(umap.embeds |> filter(story == 2) |> 
-                   select(umap.x, umap.y),
-                 umap.embeds |> filter(story == 2) |> 
-                   select(umap.x, umap.y),
-                 keep = TRUE)
-rus2.rus2.distance <- rus2.rus2$normalizedDistance
-
-fre3.fre3 <- dtw(umap.embeds |> filter(story == 3) |> 
-                   select(umap.x, umap.y),
-                 umap.embeds |> filter(story == 3) |> 
-                   select(umap.x, umap.y),
-                 keep = TRUE)
-fre3.fre3.distance <- fre3.fre3$normalizedDistance
-
-eng4.eng4 <- dtw(umap.embeds |> filter(story == 4) |> 
-                   select(umap.x, umap.y),
-                 umap.embeds |> filter(story == 4) |> 
-                   select(umap.x, umap.y),
-                 keep = TRUE)
-eng4.eng4.distance <- eng4.eng4$normalizedDistance
-
-## Final heatmap ----
-
-
-
-dtw.df <- data.frame(story = c("eng1", "rus2","fre3", "eng4"),
-                     eng1 = c(eng1.eng1.distance, rus2.eng1.distance, fre3.eng1.distance, eng4.eng1.distance),
-                     rus2 = c(eng1.rus2.distance, rus2.rus2.distance, fre3.rus2.distance, eng4.rus2.distance),
-                     fre3 = c(eng1.fre3.distance, rus2.fre3.distance, fre3.fre3.distance, eng4.fre3.distance),
-                     eng4 = c(eng1.eng4.distance, rus2.eng4.distance, fre3.eng4.distance, eng4.eng4.distance)) |> 
-  melt()
-
-write_csv(dtw.df, file = "../data/processed_data/karma_dtw_values.csv")
-
-ggplot(dtw.df, aes(x = factor(story,
+dtw.hmp <- ggplot(dtw.all, aes(x = factor(story,
                               levels = c("eng1", "rus2","fre3", "eng4")), 
                    y = factor(variable,
                               levels = c("eng1", "rus2","fre3", "eng4")), 
@@ -502,55 +578,15 @@ ggplot(dtw.df, aes(x = factor(story,
   scale_fill_distiller(name = "DTW")+
   xlab("Story")+
   ylab("Story")+
-  theme_bw()
+  theme_bw()+
+  facet_wrap(~grains)+
+  ggtitle("Heatmap of DTW by grain size")
 
-
-## Chunk DTW ----
-
-chunk.dtw <- data.frame()
-for (storyA in 1:4){
-  for (chunkA in 1:5){
-    for (storyB in 1:4){
-      for (chunkB in 1:5){
-        print(paste(storyA, chunkA, storyB, chunkB))
-        subsetA <- umap.embeds |> 
-          filter(story == storyA & chunk == chunkA)|> 
-          select(umap.x, umap.y)
-        
-        subsetB <- umap.embeds |> 
-          filter(story == storyB & chunk == chunkB)|> 
-          select(umap.x, umap.y)
-        
-        comparison <- dtw(subsetA, subsetB, keep = T)
-        
-        distance <- comparison$normalizedDistance
-        
-        new_row <- data.frame(x.story = storyA,
-                              x.chunk = chunkA,
-                              y.story = storyB,
-                              y.chunk = chunkB,
-                              dtw = distance)
-        
-        chunk.dtw <- rbind(chunk.dtw, new_row)
-      }
-    }
-  }
-}
-rm(subsetA, subsetB)
-
-chunk.dtw <- chunk.dtw |> 
-  mutate(x = paste(x.story, x.chunk, sep = "."),
-         y = paste(y.story, y.chunk, sep = "."))
-
-ggplot(chunk.dtw, aes(x = x, y = y, fill = dtw))+
-  geom_tile()+
-  scale_fill_distiller(name = "DTW")+
-  xlab("Story.chunk")+
-  ylab("Story.chunk")+
-  geom_vline(xintercept = c(5.5, 10.5, 15.5))+
-  geom_hline(yintercept = c(5.5, 10.5, 15.5))+
-  theme_bw()
-
+ggsave(dtw.hmp,
+       filename = here("../figures/karma.dtw-grainsize.heatmap.png"),
+       units = "in",
+       dpi = 300,
+       width = 11, height = 7)
 
 ## Plot x against translation distance, use color/shape to show that DTW increases as translation distance increases
 
@@ -581,35 +617,4 @@ ggplot(lm.df, aes(x = translation_steps, y = dtw.distance))+
   xlab("Translation steps")+
   ylab("DTW distance")+
   theme_bw()
-
-
-## Chunk equivalent plot ----
-
-chunk.dtw |> 
-  mutate(general_distance = abs(x.story - y.story) + abs(x.chunk - y.chunk),
-         translation_steps = abs(x.story - y.story),
-         chunk_steps = abs(x.chunk - y.chunk),
-         label = paste(x, y, sep = "-")) |> 
-  ggplot(aes(x = general_distance, y = dtw))+
-  geom_smooth(method = "lm", se = F, color = "darkblue")+
-  geom_point(shape = 21, fill = "lightblue", color = "black")+
-  xlab("General distance\nabs(x.story - y.story) + abs(x.chunk - y.chunk)")+
-  ylab("DTW Distance")+
-  theme_bw()
-
-chunk.dtw |> 
-  mutate(general_distance = abs(x.story - y.story) + abs(x.chunk - y.chunk),
-         translation_steps = abs(x.story - y.story),
-         chunk_steps = abs(x.chunk - y.chunk),
-         label = paste(x, y, sep = "-")) |> 
-  ggplot(aes(x = chunk_steps, y = dtw))+
-  geom_smooth(method = "lm", se = F, color = "darkblue")+
-  geom_point(shape = 21, fill = "lightblue", color = "black")+
-  xlab("Chunk steps")+
-  ylab("DTW Distance")+
-  theme_bw()
-
-
-
-write_csv(chunk.dtw, "../data/processed_data/karma.chunk_dtw.csv")
 
