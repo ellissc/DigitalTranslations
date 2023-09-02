@@ -196,7 +196,8 @@ embeds3 |>
 
 ## UMAP part ----
 
-umap.embeds <- read_csv("../data/embeddings/karma.umap_embeds.csv", show_col_type = F) |> 
+umap.embeds <- read_csv("../data/embeddings/karma.umap_embeds.csv", 
+                        show_col_type = F) |> 
   select(-story) |> 
   cbind(embeds3 |> select(-c(starts_with("x"))))
 
@@ -246,23 +247,23 @@ umap.embeds.4 <- umap.embeds |>
                                          .after = after, 
                                          .complete = T)))
 
-paths.1 <- umap.embeds.4 |>  
-  mutate(graph_label = paste(story, lang)) |> 
-  ggplot(aes(x=umap.x, y = umap.y, group=graph_label)) +
-  geom_path(color="grey50", linewidth =1) +
-  geom_point(aes(color=factor(sent_num.prop)), size=2) +
-  facet_grid(~graph_label) + 
-  # scale_color_gradient2(guide='none', midpoint = .5, mid="grey50") + 
-  scale_color_brewer(type = "qual", palette = 3)+
-  scale_alpha(guide=F) + 
-  theme_bw(base_size = 15)+
-  ggtitle("UMAP story paths")+
-  theme(legend.position = "none")
-
-paths.1
+# paths.1 <- umap.embeds.4 |>  
+#   mutate(graph_label = paste(story, lang)) |> 
+#   ggplot(aes(x=umap.x, y = umap.y, group=graph_label)) +
+#   geom_path(color="grey50", linewidth =1) +
+#   geom_point(aes(color=factor(sent_num.prop)), size=2) +
+#   facet_grid(~graph_label) + 
+#   # scale_color_gradient2(guide='none', midpoint = .5, mid="grey50") + 
+#   scale_color_brewer(type = "qual", palette = 3)+
+#   scale_alpha(guide=F) + 
+#   theme_bw(base_size = 15)+
+#   ggtitle("UMAP story paths")+
+#   theme(legend.position = "none")
+# 
+# paths.1
 
 umap.extremes <- umap.embeds.4 |> 
-  filter(sent_num == 31 | sent_num.prop == 1) |>  
+  filter(sent_num.prop == 1) |>  
   mutate(graph_label = paste(story, lang)) 
 
 paths.A <- umap.embeds.4 |>  
@@ -287,10 +288,40 @@ paths.A <- umap.embeds.4 |>
 paths.A
 
 ggsave(paths.A,
-       filename = here("../figures/karma.umap-normalized.png"),
+       filename = here("../figures/karma.umap-smoothed_full.png"),
        units = "in",
        dpi = 300,
-       width = 8, height = 7)
+       width = 10, height = 7)
+
+sole.track <- umap.embeds.4 |>  
+  filter(lang == "eng" & story == 1) |> 
+  mutate(graph_label = paste(story, lang)) |> 
+  ggplot(aes(x=umap.x, y = umap.y, color= graph_label, 
+             group=graph_label, alpha = sent_num.prop,
+             shape = graph_label)) +
+  geom_path(size = 0.75) +
+  geom_point(data = umap.extremes |> 
+               filter(lang == "eng" & story == 1),
+             aes(x=umap.x, y = umap.y,
+                                       color= graph_label, 
+                                       group=graph_label, 
+                                       alpha = sent_num.prop,
+                                       shape = graph_label),
+             size = 5) +
+  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
+  scale_shape_manual(values = c(15, 16, 17, 18),
+                     name = "Story")+
+  scale_alpha(guide="none") +
+  theme_bw(base_size = 15)+
+  labs(caption = "Alpha as proportional sentence number")
+
+  ggsave(sole.track,
+         filename = here("../figures/karma.umap-smoothed_sole.png"),
+         units = "in",
+         dpi = 300,
+         width = 10, height = 7)
+
+
 
 umap.embeds |>  
   mutate(graph_label = paste(story, lang)) |> 
@@ -328,28 +359,28 @@ umap.embeds.4 |>
 
 # Normalized smoothing
 
-normalized_bin_size = .05
-
-embeds_normalized_smooth <- umap.embeds |>  
-  group_by(story) |> 
-  mutate(sent_num_bin_n = normalized_bin_size * 
-           ceiling((sent_num / normalized_bin_size))) %>%
-  group_by(story, sent_num_bin_n) %>%
-  summarize(across(umap.x:umap.y, ~ mean(.x)), 
-            n=n(),
-            .groups="drop")
-
-
-# embeds_normalized_smooth |>  
-#   ggplot(aes(x=umap.x, y = umap.y, color= story, 
-#              group=story, 
+# normalized_bin_size = .05
+# 
+# embeds_normalized_smooth <- umap.embeds |>  
+#   group_by(story) |> 
+#   mutate(sent_num_bin_n = normalized_bin_size * 
+#            ceiling((sent_num / normalized_bin_size))) %>%
+#   group_by(story, sent_num_bin_n) %>%
+#   summarize(across(umap.x:umap.y, ~ mean(.x)), 
+#             n=n(),
+#             .groups="drop")
+# 
+# 
+# embeds_normalized_smooth |>
+#   ggplot(aes(x=umap.x, y = umap.y, color= story,
+#              group=story,
 #              alpha = as.numeric(sent_num.prop))) +
 #   geom_path(size=1) +
 #   # geom_point() +
 #   scale_color_brewer(type = "qual", palette = 3, name = "Story")+
-#   # scale_shape_manual(values = c(21, 23, 24, 22), 
+#   # scale_shape_manual(values = c(21, 23, 24, 22),
 #   # name = "Story")+
-#   # scale_alpha(guide="none") + 
+#   # scale_alpha(guide="none") +
 #   theme_bw(base_size = 15)+
 #   ggtitle("Overlayed story paths")
 
@@ -499,16 +530,27 @@ dtw.df <- data.frame(story = c("eng1", "rus2","fre3", "eng4"),
 
 write_csv(dtw.df, file = "../data/processed_data/karma_dtw_values.csv")
 
-ggplot(dtw.df, aes(x = factor(story,
+dtw.plot <- ggplot(dtw.df, aes(x = factor(story,
                               levels = c("eng1", "rus2","fre3", "eng4")), 
                    y = factor(variable,
                               levels = c("eng1", "rus2","fre3", "eng4")), 
                    fill = value))+
   geom_tile()+
-  scale_fill_distiller(name = "DTW")+
+  scale_fill_distiller(name = "DTW", palette = 2)+
   xlab("Story")+
   ylab("Story")+
-  theme_bw()
+  theme_bw()+
+  scale_x_discrete(expand = c(0,0))+
+  scale_y_discrete(expand = c(0,0))+
+  geom_label(aes(label = round(value, digits = 3)), fill = "white")
+
+dtw.plot
+
+ggsave(dtw.plot,
+       filename = here("../figures/karma.dtw-standard.png"),
+       units = "in",
+       dpi = 300,
+       width = 10, height = 7)
 
 
 ## Chunk DTW ----

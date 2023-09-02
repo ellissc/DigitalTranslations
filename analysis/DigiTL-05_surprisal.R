@@ -61,6 +61,9 @@ all.clean.split_wEmb <- rbind(eng1.clean.split,
                             fre3.clean.split,
                             eng4.clean.split)
 
+
+
+
 ## Surprisal analysis ----
 # Predict next-sentence vector based on ‘momentum’ from previous four sentences
 # Cosine similarity between predicted embedding and the real embedding

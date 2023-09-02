@@ -382,78 +382,55 @@ granularize.sentences <- function(grain.size, sentences){
   return(combined.sentences)
 }
 
-eng1.clean.split <- eng1.clean |> 
-  tokenize_sentences() |> 
-  unlist()
+granular.split <- data.frame()
 
-eng1.by5 <- data.frame(story = 1, lang = "eng",
-                       sentences = granularize.sentences(5, eng1.clean.split),
-                       grain_size = 5)
-
-eng1.by10 <- data.frame(story = 1, lang = "eng",
-                       sentences = granularize.sentences(10, eng1.clean.split),
-                       grain_size = 10)
-
-eng1.by20 <- data.frame(story = 1, lang = "eng",
-                        sentences = granularize.sentences(20, eng1.clean.split),
-                        grain_size = 20)
-
-rus2.clean.split <- rus2.clean |> 
-  tokenize_sentences() |> 
-  unlist() 
-
-rus2.by5 <- data.frame(story = 2, lang = "rus",
-                       sentences = granularize.sentences(5, rus2.clean.split),
-                       grain_size = 5)
-
-rus2.by10 <- data.frame(story = 2, lang = "rus",
-                        sentences = granularize.sentences(10, rus2.clean.split),
-                        grain_size = 10)
-
-rus2.by20 <- data.frame(story = 2, lang = "rus",
-                        sentences = granularize.sentences(20, rus2.clean.split),
-                        grain_size = 20)
-
-fre3.clean.split <- fre3.clean |> 
-  tokenize_sentences() |> 
-  unlist() 
-
-fre3.by5 <- data.frame(story = 3, lang = "fre",
-                       sentences = granularize.sentences(5, fre3.clean.split),
-                       grain_size = 5)
-
-fre3.by10 <- data.frame(story = 3, lang = "fre",
-                        sentences = granularize.sentences(10, fre3.clean.split),
-                        grain_size = 10)
-
-fre3.by20 <- data.frame(story = 3, lang = "fre",
-                        sentences = granularize.sentences(20, fre3.clean.split),
-                        grain_size = 20)
-
-eng4.clean.split <- eng4.clean |> 
-  tokenize_sentences() |> 
-  unlist()
-
-eng4.by5 <- data.frame(story = 4, lang = "eng",
-                       sentences = granularize.sentences(5, eng4.clean.split),
-                       grain_size = 5)
-
-eng4.by10 <- data.frame(story = 4, lang = "eng",
-                        sentences = granularize.sentences(10, eng4.clean.split),
-                        grain_size = 10)
-
-eng4.by20 <- data.frame(story = 4, lang = "eng",
-                        sentences = granularize.sentences(20, eng4.clean.split),
-                        grain_size = 20)
+for (grains in 1:20){
+  eng1.clean.split <- eng1.clean |> 
+    tokenize_sentences() |> 
+    unlist()
+  
+  eng1.grained <- data.frame(story = 1, lang = "eng",
+                         sentences = granularize.sentences(grains, eng1.clean.split),
+                         grain_size = grains)
+  
+  rus2.clean.split <- rus2.clean |> 
+    tokenize_sentences() |> 
+    unlist() 
+  
+  rus2.grained <- data.frame(story = 2, lang = "rus",
+                         sentences = granularize.sentences(grains, rus2.clean.split),
+                         grain_size = grains)
+  
+  
+  fre3.clean.split <- fre3.clean |> 
+    tokenize_sentences() |> 
+    unlist() 
+  
+  fre3.grained <- data.frame(story = 3, lang = "fre",
+                         sentences = granularize.sentences(grains, fre3.clean.split),
+                         grain_size = grains)
+  
+  eng4.clean.split <- eng4.clean |> 
+    tokenize_sentences() |> 
+    unlist()
+  
+  eng4.grained <- data.frame(story = 4, lang = "eng",
+                         sentences = granularize.sentences(grains, eng4.clean.split),
+                         grain_size = grains)
+  
+  
+  temp <- bind_rows(eng1.grained,
+                              rus2.grained,
+                              fre3.grained,
+                              eng4.grained) |> 
+    group_by(story, grain_size) |> 
+    mutate(index = 1:n()) |> 
+    ungroup()
+  
+  granular.split <- rbind(granular.split, temp)
+}
 
 
-granular.split <- bind_rows(eng1.by5, eng1.by10, eng1.by20,
-                            rus2.by5, rus2.by10, rus2.by20,
-                            fre3.by5, fre3.by10, fre3.by20,
-                            eng4.by5, eng4.by10, eng4.by20) |> 
-  group_by(story, grain_size) |> 
-  mutate(index = 1:n()) |> 
-  ungroup()
 
 write_csv(granular.split, "../data/text_split/granular_split.csv")
 

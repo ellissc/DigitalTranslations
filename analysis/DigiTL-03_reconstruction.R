@@ -20,350 +20,217 @@ library(ggh4x)
 chunk_melted <- read_csv("../data/embeddings/similarity_matrices/chunk_full_matmult.csv",
                          show_col_types = F)
 
-# Eng1: 158 sentences
-# Rus2: 142 sentences
-# Fre3: 161 sentences
-# Eng4: 172 sentences
+## Full
+full_melted.df <- read_csv("../data/embeddings/similarity_matrices/karma.combined_similarity.csv",
+                           show_col_types = F)
 
-## Nrows of Ncols
-eng1.eng1 <-
-  read_csv("../data/embeddings/similarity_matrices/english1.english1.csv",
-           show_col_type = F) |> 
-  mutate(id_var = paste0("eng1.", seq(1:n())))
-colnames(eng1.eng1) = paste0("eng1.", seq(1:ncol(eng1.eng1)))
-
-eng1.rus2 <-
-  read_csv("../data/embeddings/similarity_matrices/english1.russian2.csv",
-           show_col_type = F) |> 
-  mutate(id_var = paste0("eng1.", seq(1:n())))
-colnames(eng1.rus2) = paste0("rus2.", seq(1:ncol(eng1.rus2)))
-
-eng1.fre3 <-
-  read_csv("../data/embeddings/similarity_matrices/english1.french3.csv",
-           show_col_type = F) |> 
-  mutate(id_var = paste0("eng1.", seq(1:n())))
-colnames(eng1.fre3) = paste0("fre3.", seq(1:ncol(eng1.fre3)))
-
-eng1.eng4 <-
-  read_csv("../data/embeddings/similarity_matrices/english1.english4.csv",
-           show_col_type = F) |> 
-  mutate(id_var = paste0("eng1.", seq(1:n())))
-colnames(eng1.eng4) = paste0("eng4.", seq(1:ncol(eng1.eng4)))
-
-rus2.eng1 <-
-  read_csv("../data/embeddings/similarity_matrices/russian2.english1.csv",
-           show_col_type = F) |> 
-  mutate(id_var = paste0("rus2.", seq(1:n())))
-colnames(rus2.eng1) = paste0("eng1.", seq(1:ncol(rus2.eng1)))
-
-rus2.rus2 <-
-  read_csv("../data/embeddings/similarity_matrices/russian2.russian2.csv",
-           show_col_type = F) |> 
-  mutate(id_var = paste0("rus2.", seq(1:n())))
-colnames(rus2.rus2) = paste0("rus2.", seq(1:ncol(rus2.rus2)))
-
-rus2.fre3 <-
-  read_csv("../data/embeddings/similarity_matrices/russian2.french3.csv",
-           show_col_type = F) |> 
-  mutate(id_var = paste0("rus2.", seq(1:n())))
-colnames(rus2.fre3) = paste0("fre3.", seq(1:ncol(rus2.fre3)))
-
-rus2.eng4 <-
-  read_csv("../data/embeddings/similarity_matrices/russian2.english4.csv",
-           show_col_type = F) |> 
-  mutate(id_var = paste0("rus2.", seq(1:n())))
-colnames(rus2.eng4) = paste0("eng4.", seq(1:ncol(rus2.eng4)))
-
-fre3.eng1 <-
-  read_csv("../data/embeddings/similarity_matrices/french3.english1.csv",
-           show_col_type = F) |> 
-  mutate(id_var = paste0("fre3.", seq(1:n())))
-colnames(fre3.eng1) = paste0("eng1.", seq(1:ncol(fre3.eng1)))
-
-fre3.rus2 <-
-  read_csv("../data/embeddings/similarity_matrices/french3.russian2.csv",
-           show_col_type = F) |> 
-  mutate(id_var = paste0("fre3.", seq(1:n())))
-colnames(fre3.rus2) = paste0("rus2.", seq(1:ncol(fre3.rus2)))
-
-fre3.fre3 <-
-  read_csv("../data/embeddings/similarity_matrices/french3.french3.csv",
-           show_col_type = F) |> 
-  mutate(id_var = paste0("fre3.", seq(1:n())))
-colnames(fre3.fre3) = paste0("fre3.", seq(1:ncol(fre3.fre3)))
-
-fre3.eng4 <-
-  read_csv("../data/embeddings/similarity_matrices/french3.english4.csv",
-           show_col_type = F) |> 
-  mutate(id_var = paste0("fre3.", seq(1:n())))
-colnames(fre3.eng4) = paste0("eng4.", seq(1:ncol(fre3.eng4)))
-
-eng4.eng1 <-
-  read_csv("../data/embeddings/similarity_matrices/english4.english1.csv",
-           show_col_type = F) |> 
-  mutate(id_var = paste0("eng4.", seq(1:n())))
-colnames(eng4.eng1) = paste0("eng1.", seq(1:ncol(eng4.eng1)))
-
-eng4.rus2 <-
-  read_csv("../data/embeddings/similarity_matrices/english4.russian2.csv",
-           show_col_type = F) |> 
-  mutate(id_var = paste0("eng4.", seq(1:n())))
-colnames(eng4.rus2) = paste0("rus2.", seq(1:ncol(eng4.rus2)))
-
-eng4.fre3 <-
-  read_csv("../data/embeddings/similarity_matrices/english4.french3.csv",
-           show_col_type = F) |> 
-  mutate(id_var = paste0("eng4.", seq(1:n())))
-colnames(eng4.fre3) = paste0("fre3.", seq(1:ncol(eng4.fre3)))
-
-eng4.eng4 <-
-  read_csv("../data/embeddings/similarity_matrices/english4.english4.csv",
-           show_col_type = F) |> 
-  mutate(id_var = paste0("eng4.", seq(1:n())))
-colnames(eng4.eng4) = paste0("eng4.", seq(1:ncol(eng4.eng4)))
-
-## Melting ----
-
-
-eng1.eng1 <- eng1.eng1 |> 
-  melt(id.vars = "eng1.159", variable.name = "y") |>  # ncols
-  rename(x = eng1.159) |> 
-  mutate(x.num = as.numeric(gsub("eng1.","",x)),
-         y.num = as.numeric(gsub("eng1.","",y)),
-         x.story = "eng1", y.story = "eng1")
-
-
-eng1.rus2 <- eng1.rus2 |> 
-  melt(id.vars = "rus2.145", variable.name = "y") |> 
-  rename(x = rus2.145) |> 
-  mutate(x.num = as.numeric(gsub("eng1.","",x)),
-         y.num = as.numeric(gsub("rus2.","",y)),
-         x.story = "eng1", y.story = "rus2")
-
-eng1.fre3 <- eng1.fre3 |> 
-  melt(id.vars = "fre3.159", variable.name = "y") |> 
-  rename(x = fre3.159) |> 
-  mutate(x.num = as.numeric(gsub("eng1.","",x)),
-         y.num = as.numeric(gsub("fre3.","",y)),
-         x.story = "eng1", y.story = "fre3")
-
-eng1.eng4 <- eng1.eng4 |> 
-  melt(id.vars = "eng4.173", variable.name = "y") |> 
-  rename(x = eng4.173) |> 
-  mutate(x.num = as.numeric(gsub("eng1.","",x)),
-         y.num = as.numeric(gsub("eng4.","",y)),
-         x.story = "eng1", y.story = "eng4")
-
-rus2.eng1 <- rus2.eng1 |> 
-  melt(id.vars = "eng1.159", variable.name = "y") |> 
-  rename(x = eng1.159) |> 
-  mutate(x.num = as.numeric(gsub("rus2.","",x)),
-         y.num = as.numeric(gsub("eng1.","",y)),
-         x.story = "rus2", y.story = "eng1")
-
-rus2.rus2 <- rus2.rus2 |> 
-  melt(id.vars = "rus2.145", variable.name = "y") |> 
-  rename(x = rus2.145) |> 
-  mutate(x.num = as.numeric(gsub("rus2.","",x)),
-         y.num = as.numeric(gsub("rus2.","",y)),
-         x.story = "rus2", y.story = "rus2")
-
-rus2.fre3 <- rus2.fre3 |> 
-  melt(id.vars = "fre3.159", variable.name = "y") |> 
-  rename(x = fre3.159) |> 
-  mutate(x.num = as.numeric(gsub("rus2.","",x)),
-         y.num = as.numeric(gsub("fre3.","",y)),
-         x.story = "rus2", y.story = "fre3")
-
-rus2.eng4 <- rus2.eng4 |> 
-  melt(id.vars = "eng4.173", variable.name = "y") |> 
-  rename(x = eng4.173) |> 
-  mutate(x.num = as.numeric(gsub("rus2.","",x)),
-         y.num = as.numeric(gsub("eng4.","",y)),
-         x.story = "rus2", y.story = "eng4")
-
-fre3.eng1 <- fre3.eng1 |> 
-  melt(id.vars = "eng1.159", variable.name = "y") |> 
-  rename(x = eng1.159) |> 
-  mutate(x.num = as.numeric(gsub("fre3.","",x)),
-         y.num = as.numeric(gsub("eng1.","",y)),
-         x.story = "fre3", y.story = "eng1")
-
-fre3.rus2 <- fre3.rus2 |> 
-  melt(id.vars = "rus2.145", variable.name = "y") |> 
-  rename(x = rus2.145) |> 
-  mutate(x.num = as.numeric(gsub("fre3.","",x)),
-         y.num = as.numeric(gsub("rus2.","",y)),
-         x.story = "fre3", y.story = "rus2")
-
-fre3.fre3 <- fre3.fre3 |> 
-  melt(id.vars = "fre3.159", variable.name = "y") |> 
-  rename(x = fre3.159) |> 
-  mutate(x.num = as.numeric(gsub("fre3.","",x)),
-         y.num = as.numeric(gsub("fre3.","",y)),
-         x.story = "fre3", y.story = "fre3")
-
-fre3.eng4 <- fre3.eng4 |> 
-  melt(id.vars = "eng4.173", variable.name = "y") |> 
-  rename(x = eng4.173) |> 
-  mutate(x.num = as.numeric(gsub("fre3.","",x)),
-         y.num = as.numeric(gsub("eng4.","",y)),
-         x.story = "fre3", y.story = "eng4")
-
-eng4.eng1 <- eng4.eng1 |> 
-  melt(id.vars = "eng1.159", variable.name = "y") |> 
-  rename(x = eng1.159) |> 
-  mutate(x.num = as.numeric(gsub("eng4.","",x)),
-         y.num = as.numeric(gsub("eng1.","",y)),
-         x.story = "eng4", y.story = "eng1")
-
-eng4.rus2 <- eng4.rus2 |> 
-  melt(id.vars = "rus2.145", variable.name = "y") |> 
-  rename(x = rus2.145) |> 
-  mutate(x.num = as.numeric(gsub("eng4.","",x)),
-         y.num = as.numeric(gsub("rus2.","",y)),
-         x.story = "eng4", y.story = "rus2")
-
-eng4.fre3 <- eng4.fre3 |> 
-  melt(id.vars = "fre3.159", variable.name = "y") |> 
-  rename(x = fre3.159) |> 
-  mutate(x.num = as.numeric(gsub("eng4.","",x)),
-         y.num = as.numeric(gsub("fre3.","",y)),
-         x.story = "eng4", y.story = "fre3")
-
-eng4.eng4 <- eng4.eng4 |> 
-  melt(id.vars = "eng4.173", variable.name = "y") |> 
-  rename(x = eng4.173) |> 
-  mutate(x.num = as.numeric(gsub("eng4.","",x)),
-         y.num = as.numeric(gsub("eng4.","",y)),
-         x.story = "eng4", y.story = "eng4")
-
-## Binding ----
-
-full.melted.df <- rbind(eng1.eng1,
-                        eng1.rus2,
-                        eng1.fre3,
-                        eng1.eng4,
-                        rus2.eng1,
-                        rus2.rus2,
-                        rus2.fre3,
-                        rus2.eng4,
-                        fre3.eng1,
-                        fre3.rus2,
-                        fre3.fre3,
-                        fre3.eng4,
-                        eng4.eng1,
-                        eng4.rus2,
-                        eng4.fre3,
-                        eng4.eng4)
-
-# full.melted.df <- full.melted.df |> 
-#   group_by(x.story) |> 
-#   summarize(x.max = max(x.num)) |> 
-#   right_join(full.melted.df, by = "x.story") |> 
-#   mutate(x.prop = x.num / x.max)
-# 
-# full.melted.df <- full.melted.df |> 
-#   group_by(y.story) |> 
-#   summarize(y.max = max(y.num)) |> 
-#   right_join(full.melted.df, by = "y.story") |> 
-#   mutate(y.prop = y.num / y.max)
-
-full.melted.df <- full.melted.df |> 
+full_melted.df <- full_melted.df |> 
   group_by(x.story, y.story) |> 
   mutate(x.max = max(x.num),
          y.max = max(y.num),
          x.num.prop = x.num/x.max,
-         y.num.prop = y.num/y.max)
-
+         y.num.prop = y.num/y.max,
+         x.story = factor(x.story,
+                          levels = c("english1","russian2","french3","english4")),
+         y.story = factor(y.story,
+                          levels = c("english1","russian2","french3","english4")))
 
 
 ## Plotting ----
 
+full_melted.df |> 
+  ggplot(aes(x = x.num.prop, y = y.num.prop,
+             fill = value))+
+  geom_hex(stat = "identity")+
+  facet_grid(x.story ~ y.story)+
+  scale_fill_distiller(type = "seq",
+                       name = "Similarity")+
+  theme_bw()+
+  xlab("Sentence number")+
+  ylab("Sentence number")+
+  scale_x_continuous(expand = c(0,0))+
+  scale_y_continuous(expand = c(0,0))
 
-grid.plot <- full.melted.df |> 
+grid.plot <- full_melted.df |> 
+  mutate(label = paste(x.story, y.story, sep = " v. ")) |> 
+  mutate(label = factor(label,
+                        levels = c("english1 v. english1",
+                                   "english1 v. russian2",
+                                   "english1 v. french3",
+                                   "english1 v. english4",
+                                   "russian2 v. english1",
+                                   "russian2 v. russian2",
+                                   "russian2 v. french3",
+                                   "russian2 v. english4",
+                                   "french3 v. english1",
+                                   "french3 v. russian2",
+                                   "french3 v. french3",
+                                   "french3 v. english4",
+                                   "english4 v. english1",
+                                   "english4 v. russian2",
+                                   "english4 v. french3",
+                                   "english4 v. english4"))) |> 
   ggplot(aes(x = x.num, y = y.num, fill = value))+
   geom_tile()+
-  facet_wrap(factor(x.story,
-                    levels = c("eng1","rus2","fre3","eng4"))~factor(y.story,levels = c("eng1","rus2","fre3","eng4")), 
-             scales = "free", ncol = 4)+
+  facet_wrap(~label, scales = "free")+
   scale_fill_distiller(type = "seq",
-                    name = "Similarity")+
-  theme_bw()
+                       name = "Similarity")+
+  theme_bw()+
+  xlab("Sentence number")+
+  ylab("Sentence number")+
+  scale_x_continuous(expand = c(0,0))+
+  scale_y_continuous(expand = c(0,0))
 
 grid.plot
 
+
 ggsave(grid.plot, 
        path = "../figures/",
-       filename = "full_mega_plot.png",units = "in", 
-       width = 15, height = 15, dpi = 450)
+       filename = "karma.similarity_heatmap2.png",units = "in", 
+       width = 10, height = 7, dpi = 450)
+
+grid.plot2 <- full_melted.df |> 
+  mutate(label = paste(x.story, y.story, sep = " v. ")) |> 
+  mutate(label = factor(label,
+                        levels = c("english1 v. english1",
+                                   "english1 v. russian2",
+                                   "english1 v. french3",
+                                   "english1 v. english4",
+                                   "russian2 v. english1",
+                                   "russian2 v. russian2",
+                                   "russian2 v. french3",
+                                   "russian2 v. english4",
+                                   "french3 v. english1",
+                                   "french3 v. russian2",
+                                   "french3 v. french3",
+                                   "french3 v. english4",
+                                   "english4 v. english1",
+                                   "english4 v. russian2",
+                                   "english4 v. french3",
+                                   "english4 v. english4"))) |> 
+  filter(x.story == "english1" & y.story == "english1") |> 
+  ggplot(aes(x = x.num, y = y.num, fill = value))+
+  geom_tile()+
+  facet_wrap(~label, scales = "free")+
+  scale_fill_distiller(type = "seq",
+                       name = "Similarity")+
+  theme_bw()+
+  xlab("Sentence number")+
+  ylab("Sentence number")+
+  scale_x_continuous(expand = c(0,0))+
+  scale_y_continuous(expand = c(0,0))
+
+grid.plot2
+
+ggsave(grid.plot2, 
+       path = "../figures/",
+       filename = "karma.similarity_heatmap-solo.png",units = "in", 
+       width = 7, height = 5, dpi = 450)
+
+grid.plot3 <- full_melted.df |> 
+  mutate(label = paste(x.story, y.story, sep = " v. ")) |> 
+  mutate(label = factor(label,
+                        levels = c("english1 v. english1",
+                                   "english1 v. russian2",
+                                   "english1 v. french3",
+                                   "english1 v. english4",
+                                   "russian2 v. english1",
+                                   "russian2 v. russian2",
+                                   "russian2 v. french3",
+                                   "russian2 v. english4",
+                                   "french3 v. english1",
+                                   "french3 v. russian2",
+                                   "french3 v. french3",
+                                   "french3 v. english4",
+                                   "english4 v. english1",
+                                   "english4 v. russian2",
+                                   "english4 v. french3",
+                                   "english4 v. english4"))) |> 
+  filter(x.story == "english1") |> 
+  ggplot(aes(x = x.num, y = y.num, fill = value))+
+  geom_tile()+
+  facet_wrap(~label, scales = "free", ncol = 4)+
+  scale_fill_distiller(type = "seq",
+                       name = "Similarity")+
+  theme_bw()+
+  xlab("Sentence number")+
+  ylab("Sentence number")+
+  scale_x_continuous(expand = c(0,0))+
+  scale_y_continuous(expand = c(0,0))
+
+grid.plot3
+
+ggsave(grid.plot3, 
+       path = "../figures/",
+       filename = "karma.similarity_heatmap-row.png",units = "in", 
+       width = 8, height = 2, dpi = 450)
 
 
 # Chunk plot
-num2lang <- function(x){
-  x = as.numeric(x)
-  if (x == 1){
-    return("eng1")
-  } else if(x == 2){
-    return("rus2")
-  } else if(x == 3){
-    return("fre3")
-  } else if(x == 4){
-    return("eng4")
-  } else {
-    return("null")
-  }
-}
+# num2lang <- function(x){
+#   x = as.numeric(x)
+#   if (x == 1){
+#     return("eng1")
+#   } else if(x == 2){
+#     return("rus2")
+#   } else if(x == 3){
+#     return("fre3")
+#   } else if(x == 4){
+#     return("eng4")
+#   } else {
+#     return("null")
+#   }
+# }
 
 # x as true lang, y as pred lang
 
-chunk_melted <- chunk_melted |> 
-  rowwise() |> 
-  mutate(x.id = paste(num2lang(x.story), x.chunk, sep = "."),
-         y.id = paste(num2lang(y.story), y.chunk, sep = ".")) |> 
-  group_by(x.story, y.story) |> 
-  mutate(x.max = max(x.num),
-         y.max = max(y.num),
-         x.num.prop = x.num/x.max,
-         y.num.prop = y.num/y.max) |> 
-  select(-c(x.max, y.max))
-
-grid.levels = c(paste("eng1", rep(1:5),sep = "."),
-                paste("rus2", rep(1:5),sep = "."),
-                paste("fre3", rep(1:5),sep = "."),
-                paste("eng4", rep(1:5),sep = "."))
-
-strip <- strip_themed(background_x = elem_list_rect(fill = c(rep("lightblue", 5),
-                                                             rep("red",5),
-                                                             rep("darkgreen",5),
-                                                             rep("darkorange",5)
-                                                             )
-                                                    ),
-                      background_y = elem_list_rect(fill = c(rep("lightblue", 5),
-                                                             rep("red",5),
-                                                             rep("darkgreen",5),
-                                                             rep("darkorange",5)
-                                                             )
-                                                    )
-                      )
-
-
-chunk_plot <- ggplot(chunk_melted, aes(x = x.num, y = y.num, fill = value))+
-  geom_tile()+
-  xlab("true lang")+
-  ylab("pred lang")+
-  facet_grid2(factor(x.id, levels = grid.levels) ~ factor(y.id, levels = grid.levels),
-              strip = strip)+
-  scale_fill_distiller(type = "seq",
-                       name = "Similarity")+
-  theme_bw()
-  
-chunk_plot
-
-ggsave(chunk_plot, 
-       path = "../figures/",
-       filename = "karma.chunk-similarities.png",units = "in", 
-       width = 30, height = 30)
+# chunk_melted <- chunk_melted |> 
+#   rowwise() |> 
+#   mutate(x.id = paste(num2lang(x.story), x.chunk, sep = "."),
+#          y.id = paste(num2lang(y.story), y.chunk, sep = ".")) |> 
+#   group_by(x.story, y.story) |> 
+#   mutate(x.max = max(x.num),
+#          y.max = max(y.num),
+#          x.num.prop = x.num/x.max,
+#          y.num.prop = y.num/y.max) |> 
+#   select(-c(x.max, y.max))
+# 
+# grid.levels = c(paste("eng1", rep(1:5),sep = "."),
+#                 paste("rus2", rep(1:5),sep = "."),
+#                 paste("fre3", rep(1:5),sep = "."),
+#                 paste("eng4", rep(1:5),sep = "."))
+# 
+# strip <- strip_themed(background_x = elem_list_rect(fill = c(rep("lightblue", 5),
+#                                                              rep("red",5),
+#                                                              rep("darkgreen",5),
+#                                                              rep("darkorange",5)
+#                                                              )
+#                                                     ),
+#                       background_y = elem_list_rect(fill = c(rep("lightblue", 5),
+#                                                              rep("red",5),
+#                                                              rep("darkgreen",5),
+#                                                              rep("darkorange",5)
+#                                                              )
+#                                                     )
+#                       )
+# 
+# 
+# chunk_plot <- ggplot(chunk_melted, aes(x = x.num, y = y.num, fill = value))+
+#   geom_tile()+
+#   xlab("true lang")+
+#   ylab("pred lang")+
+#   facet_grid2(factor(x.id, levels = grid.levels) ~ factor(y.id, levels = grid.levels),
+#               strip = strip)+
+#   scale_fill_distiller(type = "seq",
+#                        name = "Similarity")+
+#   theme_bw()
+#   
+# chunk_plot
+# 
+# ggsave(chunk_plot, 
+#        path = "../figures/",
+#        filename = "karma.chunk-similarities.png",units = "in", 
+#        width = 30, height = 30)
 
 # # Read in the stories
 # all.clean.split <-
@@ -403,31 +270,49 @@ chunk_scores <- chunk_melted |>
 
 reconstruct_full <- function(temp_melted){
   temp_melted |> 
-    group_by(x, x.story, y.story) |> # x as source, y as reconstruction targets
+    group_by(x.num, x.story, y.story) |> # x as source, y as reconstruction targets
     mutate(max.sim = max(value)) |> 
     ungroup() |> 
     filter(value == max.sim)
 }
 
-test_full <- full.melted.df |> 
+test_full <- full_melted.df |> 
   reconstruct_full() |> 
   mutate(num.prop.diff = y.num.prop - x.num.prop,
          num.prop.diff.abs = abs(num.prop.diff))
 
 
-
-ggplot(test_full, aes(x = x.num.prop, y = y.num.prop))+
+test_full |> 
+  mutate(label = paste(x.story, y.story, sep = " v. ")) |> 
+  mutate(label = factor(label,
+                        levels = c("english1 v. english1",
+                                   "english1 v. russian2",
+                                   "english1 v. french3",
+                                   "english1 v. english4",
+                                   "russian2 v. english1",
+                                   "russian2 v. russian2",
+                                   "russian2 v. french3",
+                                   "russian2 v. english4",
+                                   "french3 v. english1",
+                                   "french3 v. russian2",
+                                   "french3 v. french3",
+                                   "french3 v. english4",
+                                   "english4 v. english1",
+                                   "english4 v. russian2",
+                                   "english4 v. french3",
+                                   "english4 v. english4"))) |> 
+  ggplot(aes(x = x.num.prop, y = y.num.prop))+
   # geom_point(aes(size = as.numeric(max.sim)))+
   geom_line()+
   theme(legend.position = "none")+
-  facet_grid(factor(x.story, levels = c("eng1","rus2","fre3","eng4")) ~ 
-               factor(y.story, levels = c("eng1","rus2","fre3","eng4")))+
+  facet_wrap(~label)+
   xlab("Source sentence (prop.)")+
-  ylab("Reconstruction sentence (prop.)")
+  ylab("Reconstruction sentence (prop.)")+
+  geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed", alpha = 0.7)
 
 ggsave(path = "../figures/",
        filename = "karma.full-reconstruction.png",units = "in", 
-       width = 10, height = 10)
+       width = 12, height = 7)
 
 ggplot(chunk_scores, aes(x = x.num.prop, y = y.num.prop))+
   geom_line()+

@@ -1,162 +1,161 @@
 story,chunk,lang,sentences,chunk_sent_num,chunk_prop_num,sent_num,prop_num
-1,1,eng,"Pandu, a wealthy jeweller of the Brahman caste, was travelling with a servant in a carriage on some lucrative business to Varanasi,!",1,0.038461538461538464,1,0.006329113924050633
-1,1,eng,"and overtaking on his way a monk of venerable appearance who was walking in the same direction, he thought to himself; ' This shramana' looks noble and saintly, Companionship with good men brings luck; should he also be going to Varanasi, I will invite him to ride with me in my carriage.""",2,0.07692307692307693,2,0.012658227848101266
-1,1,eng,Having saluted the shramana he told him whither he was driving and at what inn he intended to stay in Varanasi.,3,0.11538461538461539,3,0.0189873417721519
-1,1,eng,"Learning that the shramana, whose name was Narada, also was travelling to Varanasi, he asked him to accept a seat in his carriage.",4,0.15384615384615385,4,0.02531645569620253
-1,1,eng,"'I am obliged to you for your kindness,"" said the shramana to the Brahman, for I am quite worn out by the long journey.",5,0.19230769230769232,5,0.03164556962025317
-1,1,eng,"Having no possessions in this world, I cannot repay you in money; but it may happen that I can reward you with some spiritual treasure out of the wealth of the information I have received while following Shakyamuni, the Blessed One, the Great Buddha, the Teacher of mankind.""",6,0.23076923076923078,6,0.0379746835443038
-1,1,eng,Both travelled together in the carriage and Pandu listened with pleasure to the instructive discourse of Narada.,7,0.2692307692307692,7,0.04430379746835443
-1,1,eng,"After about an hour's journey, they came to a place where the road had become almost impassable by a washout caused by a recent rain, and a farmer's cart with a broken wheel prevented further progress.",8,0.3076923076923077,8,0.05063291139240506
-1,1,eng,"Dévala, the owner of the cart, was on his way to Varanasi to sell his rice, and was anxious to reach the town before the dawn of the next morning.",9,0.34615384615384615,9,0.056962025316455694
-1,1,eng,"If he was delayed a day or two longer, the rice merchants might have left town or bought all the stock they needed.",10,0.38461538461538464,10,0.06329113924050633
-1,1,eng,"When the jeweller saw that he could not proceed on his way unless the farmer's cart was removed, he began to grow angry and ordered Mahadata, his slave, to push the cart aside, so that his carriage could pass by.",11,0.4230769230769231,11,0.06962025316455696
-1,1,eng,"The farmer remonstrated because it being so near the slope of the road, it would jeopardise his cargo; but the Brahman would not listen to the farmer and bade his servant overturn the rice cart and push it aside.",12,0.46153846153846156,12,0.0759493670886076
-1,1,eng,"Mahaduta, an unusually strong man who seemed to take delight in the injury of others, obeyed before the shramana could interfere.",13,0.5,13,0.08227848101265822
-1,1,eng,"When Pandu was about to continue his travel the shramana jumped out of the carriage and said: 'Excuse me, sir, for leaving you here.",14,0.5384615384615384,14,0.08860759493670886
-1,1,eng,I am under obligations for your kindness in giving me an hour's ride in your carriage.,15,0.5769230769230769,15,0.0949367088607595
-1,1,eng,"I was tired when you picked me up on the road, but now thanks to your courtesy, I am rested, and recognising in this farmer an incarnation of one of your ancestors I cannot repay your kindness better than by assisting him in his troubles.""",16,0.6153846153846154,16,0.10126582278481013
-1,1,eng,"The Brahman looked at the shramana in amazement: ""That farmer, you say, is an incarnation of one of my ancestors?",17,0.6538461538461539,17,0.10759493670886076
-1,1,eng,"That is impossible.""",18,0.6923076923076923,18,0.11392405063291139
-1,1,eng,"""I know,"" replied the shramana, ""that you are not aware of the numerous important relations which tie your fate to that of the farmer.",19,0.7307692307692307,19,0.12025316455696203
-1,1,eng,"But the blind man cannot be expected to see; so I regret that you do harm to yourself and I shall try to protect you against the wounds which you are about to inflict upon yourself.""",20,0.7692307692307693,20,0.12658227848101267
-1,1,eng,"The wealthy merchant was not accustomed to be reprimanded, and feeling that the words of the shramana, although uttered with great kindness, contained a stinging reproach, bade his servant drive on without further delay.",21,0.8076923076923077,21,0.13291139240506328
-1,1,eng,"The shramana saluted Dévala, the farmer, and began to help him repair his cart and load up the rice, part of which had been thrown out.",22,0.8461538461538461,22,0.13924050632911392
-1,1,eng,"The work proceeded quickly and Dévala thought: ""This shramana must be a holy man; invisible devas seem to assist him, I will ask him how I deserved the ill treatment at the hands of the proud Brahman.""",23,0.8846153846153846,23,0.14556962025316456
-1,1,eng,"And he said: ""Venerable sir, can you tell me why I suffer an injustice from a man to whom I have never done any harm?""",24,0.9230769230769231,24,0.1518987341772152
-1,1,eng,"And the shramana said: ""My dear friend, you do not suffer an injustice, but only receive in your present state of existence the same treatment which you visited upon the jeweller in a former life, and if I am not mistaken in reading the thoughts of your mind, I should say that you would, even to-day, have done the same unto the jeweller if he had been in your place, and if you had had such a strong slave at your command as he has, able to deal with you at his pleasure.""",25,0.9615384615384616,25,0.15822784810126583
-1,1,eng,"The farmer confessed that if he had had the power, he would have felt little compunction in treating another man who had happened to impede his way as he had been treated by the Brahman, but thinking of the retribution attendant upon unkind deeds, he resolved to be more considerate in the future with his fellow beings.",26,1,26,0.16455696202531644
-1,2,eng,"The rice was loaded and both travelled on to Varanasi, when all of a sudden the horse jumped aside.",1,0.024390243902439025,27,0.17088607594936708
-1,2,eng,"""A snake, a snake!""",2,0.04878048780487805,28,0.17721518987341772
-1,2,eng,shouted the farmer.,3,0.07317073170731707,29,0.18354430379746836
-1,2,eng,"But the shramana looked closely at the object at which the horse shuddered, jumped out of the cart and saw that it was a purse full of gold, and the idea struck him: 'No one else but the wealthy jeweller can have lost this purse.""",4,0.0975609756097561,30,0.189873417721519
-1,2,eng,"He took the purse and handing it to the farmer said: 'Take this purse and when you come to Varanasi drive up to the inn which I shall point out to you; ask for Pandu, the Brahman, and deliver the purse.",5,0.12195121951219512,31,0.1962025316455696
-1,2,eng,"He will excuse himself for the rudeness with which he treated you, but tell him that you have forgiven him and wish him success in all his undertakings.",6,0.14634146341463414,32,0.20253164556962025
-1,2,eng,"For, let me tell you, the more successful he is, the better you will prosper; your fate depends in many respects upon his fate.",7,0.17073170731707318,33,0.2088607594936709
-1,2,eng,"Should the jeweller demand any explanation, send him to the vildra where he shall find me ready to assist him with advice in case he may feel the need of it.""",8,0.1951219512195122,34,0.21518987341772153
-1,2,eng,"Pandu in the meantime arrived at Varanasi and met Mallika, his business-friend, a rich banker, ""I am a ruined man,"" said Mallika, ""and can do no business with you, unless I can buy a cart of the best rice for the king's table.",9,0.21951219512195122,35,0.22151898734177214
-1,2,eng,"There is a rival banker in Varanasi who learning that I had made a contract with the royal treasurer to deliver the rice to-morrow morning, and being desirous to bring about my destruction, has bought up all the rice in Varanasi, the royal treasurer must have received a bribe, for he will not release me from my contract and to-morrow I shall be a ruined man unless Krishna will send an angel from heaven to help me.""",10,0.24390243902439024,36,0.22784810126582278
-1,2,eng,"While Mallika was still lamenting the poverty to which his rival would reduce him, Pandu missed his purse.",11,0.2682926829268293,37,0.23417721518987342
-1,2,eng,"Searching his carriage without being able to find it, he suspected his slave Mahaduta; and calling the police accused him of theft, and had him bound and cruelly tortured to extort a confession.",12,0.2926829268292683,38,0.24050632911392406
-1,2,eng,"The slave in his agonies cried: ""I am innocent, let me go, for I cannot stand this pain; I am quite innocent at least of this crime, and suffer now for other sins.",13,0.3170731707317073,39,0.2468354430379747
-1,2,eng,"O, that I could beg the farmer's pardon whom, far the sake of my master, I wronged without any cause!",14,0.34146341463414637,40,0.25316455696202533
-1,2,eng,"This torture, I believe, is a punishment for my rudeness.""",15,0.36585365853658536,41,0.25949367088607594
-1,2,eng,"While the police officer was still applying the lash to the back of the slave, the farmer arrived at the inn, and, to the great astonishment of all concerned, delivered the purse.",16,0.3902439024390244,42,0.26582278481012656
-1,2,eng,The slave was at once released from the hands of his torturer.,17,0.4146341463414634,43,0.2721518987341772
-1,2,eng,"But being dissatisfied with his master, he secretly left and joined a band of robbers in the mountains, who made him their chief on account of his great strength and courage.",18,0.43902439024390244,44,0.27848101265822783
-1,2,eng,"When Mallika heard that the farmer had the best rice to sell, fit for delivery to the royal table, he bought at once the whole car-load for triple the price that the farmer had ever received, and Pandu, glad at heart to have his money restored, hastened at once to the vihara to receive further explanations from Narada, the shramana.",19,0.4634146341463415,45,0.2848101265822785
-1,2,eng,"Narada said: ""I might give thee an explanation, but knowing that thou art unable to understand a spiritual truth, I prefer to remain silent.",20,0.4878048780487805,46,0.2911392405063291
-1,2,eng,"However, I shall give thee some advice: Treat every man whom thou meetest as thy own self; serve him as thou wouldst demand to be served thyself; for thus thou shalt sow a sowing of good deeds, the rich harvest of which thou wilt not fail to reap.""",21,0.5121951219512195,47,0.2974683544303797
-1,2,eng,"""Give me, O shramana, the explanation,"" said the jeweller, ""and I shall thereby be better able to follow your advice.""",22,0.5365853658536586,48,0.3037974683544304
-1,2,eng,"The shramana said: 'Listen then, I will give you the key to the mystery.",23,0.5609756097560976,49,0.310126582278481
-1,2,eng,"If you do not understand it, have faith in what I say.",24,0.5853658536585366,50,0.31645569620253167
-1,2,eng,"Self is an illusion, and he whose mind is bent upon following self, follows an ignis fatuus which leads him into the quagmire of sin.",25,0.6097560975609756,51,0.3227848101265823
-1,2,eng,"The illusion of self is the veil of Maya that blinds your eyes and prevents you from recognising the close relations that obtain between yourself and your fellows, and from tracing the identity of your self in the souls of other beings.",26,0.6341463414634146,52,0.3291139240506329
-1,2,eng,Ignorance is the source of sin.,27,0.6585365853658537,53,0.33544303797468356
-1,2,eng,There are few who know the truth.,28,0.6829268292682927,54,0.34177215189873417
-1,2,eng,Let this motto be your talisman: 'He who hurts others injures himself.,29,0.7073170731707317,55,0.34810126582278483
-1,2,eng,He who helps others advances his own interests.,30,0.7317073170731707,56,0.35443037974683544
-1,2,eng,Let the delusion of self disappear from your mind.,31,0.7560975609756098,57,0.36075949367088606
-1,2,eng,And you will naturally walk in the path of truth.',32,0.7804878048780488,58,0.3670886075949367
-1,2,eng,"""To him whose vision is dimmed by the veil of Maya, the spiritual world appears to be cut up into innumerable selves.",33,0.8048780487804879,59,0.37341772151898733
-1,2,eng,"Thus he will be puzzled in many ways concerning the transmigration of soul-life, and will be incapable of understanding the import of an alléomprehensive kindness toward all living beings.""",34,0.8292682926829268,60,0.379746835443038
-1,2,eng,"The jeweller replied: 'Your words, O venerable sir, have a deep significance and I shall bear them in mind.",35,0.8536585365853658,61,0.3860759493670886
-1,2,eng,"I extended a small kindness which caused me no expense whatever to a poor shramana on my way to Varanasi, and lo!",36,0.8780487804878049,62,0.3924050632911392
-1,2,eng,how propitious has been the result!,37,0.9024390243902439,63,0.3987341772151899
-1,2,eng,"I am deeply in your debt, for without you I should not only have lost my purse, but would have been prevented from doing business in Varanasi which greatly increased my wealth, while if it had been left undone it might have reduced me to a state of wretched poverty.",38,0.926829268292683,64,0.4050632911392405
-1,2,eng,"In addition, your thoughtfulness and the arrival of the farmer's rice-cart preserved the prosperity of my friend Mallika, the banker.",39,0.9512195121951219,65,0.41139240506329117
-1,2,eng,"If all men saw the truth of your maxims, how much better the world would be, how greatly evils would be lessened, and public welfare enhanced!",40,0.975609756097561,66,0.4177215189873418
-1,2,eng,"As I am anxious to let the truth of buddha be understood, I shall found a vihara at my native place, Kaushambi, and invite you to visit me so that I may dedicate the place to the brotherhood of Buddha's disciples.""",41,1,67,0.4240506329113924
-1,3,eng,Years passed on and Pandu's vihara at Kaushambi became a place in which wise shramanas used to stay and it was renowned as a centre of enlightenment for the people of the town.,1,0.02857142857142857,68,0.43037974683544306
-1,3,eng,"At that time the king of a neighboring country had heard of the beauty of Pandu's jewelry, and he sent his treasurer to order a royal diadem wrought in pure gold and set with the most precious stones of India.",2,0.05714285714285714,69,0.43670886075949367
-1,3,eng,"When Pandu had finished the work, he started for the residence of the king, and as he expected to transact other profitable business, took with him a great store of gold pieces.",3,0.08571428571428572,70,0.4430379746835443
-1,3,eng,"The caravan carrying his goods was protected by a strong escort of armed men, but when they reached the mountains they were attacked by a band of robbers lead by Mahaduta, who beat them and took away all the jewelry and the gold, and Pandu escaped with great difficulty.",4,0.11428571428571428,71,0.44936708860759494
-1,3,eng,"This misfortune was a blow to Pandu's prosperity, and as he suffered some other severe losses, his wealth was much reduced.",5,0.14285714285714285,72,0.45569620253164556
-1,3,eng,"Pandu was much distressed, but he bore his misfortunes without complaint, thinking to himself: ""I have deserved these losses for the sins committed in my past existence.",6,0.17142857142857143,73,0.4620253164556962
-1,3,eng,"In my younger years I was very hard on other people; when I now reap the harvest of my evil deeds I have no cause for complaint.""",7,0.2,74,0.46835443037974683
-1,3,eng,"As he had grown in kindliness toward all beings, his misfortunes only served to purify his heart; and his chief regret, when thinking of his reduced means, was that he had become unable to do good and to help his friends in the vihara to spread the truths of religion.",8,0.22857142857142856,75,0.47468354430379744
-1,3,eng,"Again years passed on and it happened that Panthaka, a young shramana and a disciple of Narada, was travelling through the mountains of Kaushambi, and he fell among the robbers in the mountains.",9,0.2571428571428571,76,0.4810126582278481
-1,3,eng,"As he had nothing in his possession, the robber-chief beat him severely and let him go.",10,0.2857142857142857,77,0.4873417721518987
-1,3,eng,"On the next morning Panthaka, while pursuing his way through the woods, heard a noise as of quarrelling and fighting men, and going to the place he saw a number of robbers, all of them in a great rage, and in their midst stood Mahaduta, their chief; and the chief was desperately fighting them, like a lion surrounded by hounds, and he slew several of his aggressors with formidable blows, but there were too many against one!",11,0.3142857142857143,78,0.4936708860759494
-1,3,eng,"At last he succumbed and fell to the ground as if dead, covered with fatal wounds.",12,0.34285714285714286,79,0.5
-1,3,eng,"As soon as the robbers had left the place the young shramana approached to see whether he could be of any assistance to the wounded men, He found that all the robbers were dead, and there was only a little life left in the chief, He at once went down to the little brooklet which was murmoring near by, fetched fresh water in his bowl and brought it to the dying man.",13,0.37142857142857144,80,0.5063291139240507
-1,3,eng,"Mahaduta opened his eyes and, gnashing his teeth, said: ""Where are those ungrateful dogs whom I have led to victory and success?",14,0.4,81,0.5126582278481012
-1,3,eng,"Without me as their chief they will soon perish like jackals hunted down by skillful hunters.""",15,0.42857142857142855,82,0.5189873417721519
-1,3,eng,"""Do not think of your comrades, the companions of your sinful life,"" said Panthaka, ""but think of your soul and accept in the last moment the chance of salvation that is offered you.",16,0.45714285714285713,83,0.5253164556962026
-1,3,eng,"Here is water to drink, and let me dress your wounds; perhaps I may save your life.""",17,0.4857142857142857,84,0.5316455696202531
-1,3,eng,"""Alas!",18,0.5142857142857142,85,0.5379746835443038
-1,3,eng,"alas!""",19,0.5428571428571428,86,0.5443037974683544
-1,3,eng,"replied Mahaduta, ""are you not the man whom I beat but yesterday and now you come to my assistance, to assuage my pain?",20,0.5714285714285714,87,0.5506329113924051
-1,3,eng,"You bring me fresh water to quench my thirst, and try to save my life!",21,0.6,88,0.5569620253164557
-1,3,eng,"It is useless, honorable sir, I am a doomed man.",22,0.6285714285714286,89,0.5632911392405063
-1,3,eng,The churls have wounded me unto death—the ungrateful cowards!,23,0.6571428571428571,90,0.569620253164557
-1,3,eng,"They have dealt me the blows which I taught them.""",24,0.6857142857142857,91,0.5759493670886076
-1,3,eng,"""You reap what you have sown;"" continued the shramana, ""had you taught your comrades acts of kindness, you would have received from them acts of kindness, but having taught them the lesson of slaughter, it is but your own deed that you are slain by their hands.""",25,0.7142857142857143,92,0.5822784810126582
-1,3,eng,"""True, very true,"" said the robber chief, my fate is well deserved; but how sad is my lot, that I must reap the full harvest of all my evil deeds in future existences!",26,0.7428571428571429,93,0.5886075949367089
-1,3,eng,"Advise me, O holy sir, what I can do to lighten the sins of my life which oppress me like a great rock placed upon my breast, taking away the breath of my lungs.""",27,0.7714285714285715,94,0.5949367088607594
-1,3,eng,"Said Panthaka: ""Root out your sinful desires; destroy all evil passions, and fill your soul with kindness toward all your fellow beings.""",28,0.8,95,0.6012658227848101
-1,3,eng,"The robber chief said: ""I have done much evil and no good.",29,0.8285714285714286,96,0.6075949367088608
-1,3,eng,How can I extricate myself from the net of sorrow which I have woven out of the evil desires of my own heart?,30,0.8571428571428571,97,0.6139240506329114
-1,3,eng,"My Karma will lead me to hell and I shall never be able to walk on the path of salvation.""",31,0.8857142857142857,98,0.620253164556962
-1,3,eng,"Said the shramana: ""Indeed your Karma will in its future incarnations reap the seeds of evil that you have sown.",32,0.9142857142857143,99,0.6265822784810127
-1,3,eng,There is no escape for an evil doer from the consequences of his own actions.,33,0.9428571428571428,100,0.6329113924050633
-1,3,eng,But there is no cause for despair.,34,0.9714285714285714,101,0.6392405063291139
-1,3,eng,The man who is converted and has rooted out the illusion of self with all its lusts and sinful desires will be a source of blessing to himself and others.,35,1,102,0.6455696202531646
-1,4,eng,As an illustration I will tell you the story of the great robber Kandata who died without repentance and was reborn as a demon in hell where he suffered for his evil deeds the most terrible agonies and pains.,1,0.03571428571428571,103,0.6518987341772152
-1,4,eng,He had been in hell several kalpas and was unable to rise out of his wretched condition when Buddha appeared upon earth and attained to the blessed state of enlightenment.,2,0.07142857142857142,104,0.6582278481012658
-1,4,eng,"At that memorable moment a ray of light fell dawn into hell quickening all the demons with fear and hope, and the robber Kandata cried aloud: 'O blessed Buddha, have mercy upon me!",3,0.10714285714285714,105,0.6645569620253164
-1,4,eng,"I suffer greatly and although I have done evil, I am anxious to walk in the noble path of righteousness.",4,0.14285714285714285,106,0.6708860759493671
-1,4,eng,But I cannot extricate myself from the net of sorrow.,5,0.17857142857142858,107,0.6772151898734177
-1,4,eng,"Help me, O Lord; have mercy on me!'",6,0.21428571428571427,108,0.6835443037974683
-1,4,eng,"Now it is, the law of Karma that evil deeds lead to destruction, for absolute evil is so bad that it cannot exist.",7,0.25,109,0.689873417721519
-1,4,eng,Absolute evil involves impossibility of existence.,8,0.2857142857142857,110,0.6962025316455697
-1,4,eng,But good deeds lead to life.,9,0.32142857142857145,111,0.7025316455696202
-1,4,eng,"Thus there is a final end of every decd that is done, but there is no end in the development of good deeds.",10,0.35714285714285715,112,0.7088607594936709
-1,4,eng,"The least act of goodness bears fruits containing new seeds of goodness and they continue to grow, they nourish the soul in its weary transmigrations until it reaches the final deliverance from all evil in Nirvana.",11,0.39285714285714285,113,0.7151898734177216
-1,4,eng,"When Buddha, the Lord, heard the prayer of the demon suffering in hell, he sent down a spider on a cobweb and the spider said: 'Take hold of the web and climb up.'",12,0.42857142857142855,114,0.7215189873417721
-1,4,eng,"When the spider had again disappeared out of sight, Kandata made great efforts to climb up and he succeeded.",13,0.4642857142857143,115,0.7278481012658228
-1,4,eng,"The web was so strong that it held, and he ascended higher and higher.",14,0.5,116,0.7341772151898734
-1,4,eng,"Suddenly he felt the thread trembling and shaking, for behind him other fellow sufferers of his were beginning to climb up.",15,0.5357142857142857,117,0.740506329113924
-1,4,eng,Kandata became frightened.,16,0.5714285714285714,118,0.7468354430379747
-1,4,eng,"He saw the thinness of the web, and observed that it was elastic, for under the increased weight it stretched out; yet it still seemed strong enough to carry him.",17,0.6071428571428571,119,0.7531645569620253
-1,4,eng,"Kandata had heretofore only looked up; he now looked down and saw following close upon his heels, also climbing up on the cobweb a numberless mob of the denizens of hell.",18,0.6428571428571429,120,0.759493670886076
-1,4,eng,"How can this thin thread bear the weight of all, he thought to himself, and seized with fear he shouted loudly: 'Let go the cobweb.",19,0.6785714285714286,121,0.7658227848101266
-1,4,eng,It is mine!',20,0.7142857142857143,122,0.7721518987341772
-1,4,eng,At once the cobweb broke and Kandata fell back into hell.,21,0.75,123,0.7784810126582279
-1,4,eng,The illusion of self was still upon Kandata.,22,0.7857142857142857,124,0.7848101265822784
-1,4,eng,He did not know the miraculous power of a sincere longing to rise upwards and enter the noble path of righteousness.,23,0.8214285714285714,125,0.7911392405063291
-1,4,eng,"It is thin like a cobweb but it will carry millions of people, and the more there are that climb it, the easier will be the efforts of every one of them.",24,0.8571428571428571,126,0.7974683544303798
-1,4,eng,"But as soon as in a man's heart the idea arises; 'This is mine; let the bliss of righteousness be mine alone and let no one else partake of it,' the thread breaks, and you fall back into your old condition of selfhood, for selfhood is damnation and truth is bliss.",25,0.8928571428571429,127,0.8037974683544303
-1,4,eng,What is hell?,26,0.9285714285714286,128,0.810126582278481
-1,4,eng,"It is nothing but egotism, and Nirvana is a life of righteousness.""",27,0.9642857142857143,129,0.8164556962025317
-1,4,eng,"""Let me take hold of a spiderweb,"" said the dying robber chief, when the shramana had finished his story, ""and I shall pull myself up out of the depth of hell.""",28,1,130,0.8227848101265823
-1,5,eng,Mahaduta lay for a while quiet to collect his thoughts.,1,0.03571428571428571,131,0.8291139240506329
-1,5,eng,"Then he continued: ""Listen, honorable sir, I will make a confession: I was the servant of Pandu, the jeweller of Kaushambi, but when he unjustly had me tortured I ran away and became a chief of robbers. heard through my spies that he was passing through the mountains I succeeded in robbing him of a great part of his wealth.",2,0.07142857142857142,132,0.8354430379746836
-1,5,eng,"Will you now go to him and tell him that I have forgiven him from the bottom of my heart the injury which he has unjustly inflicted upon me, and ask him, too, to pardon me for having robbed him.",3,0.10714285714285714,133,0.8417721518987342
-1,5,eng,"While I stayed with him his heart was as hard as stone, and I learned to imitate the selfishness of his character.",4,0.14285714285714285,134,0.8481012658227848
-1,5,eng,I have heard that he has become benevolent and is now pointed out as an example of goodness and justice.,5,0.17857142857142858,135,0.8544303797468354
-1,5,eng,I do not wish to remain in his debt.,6,0.21428571428571427,136,0.8607594936708861
-1,5,eng,"Therefore inform him that I have kept the gold crown, which he wrought for the king, and all his treasures, and have hidden them in a cave near by.",7,0.25,137,0.8670886075949367
-1,5,eng,"There were only two of the robbers under my command who knew of it, and both are now dead.",8,0.2857142857142857,138,0.8734177215189873
-1,5,eng,"Let Pandu take a number of armed men and come to the place and take back the property of which I have deprived him.""",9,0.32142857142857145,139,0.879746835443038
-1,5,eng,Then Mahaduta described the situation of the cave and died in the arms of Panthaka.,10,0.35714285714285715,140,0.8860759493670886
-1,5,eng,"As soon as Panthaka, the young shramana, had reached Kaushambi, he went to the jeweller and gave him a full account of his recent adventure in the forest.",11,0.39285714285714285,141,0.8924050632911392
-1,5,eng,"And Pandu went with an escort of armed men and secured the treasures which the robber-chief had concealed in the cave; and they buried the robber-chief and his slain comrades with all honors, and Panthaka spoke at the grave, discoursing on the words of Buddha: ""By one's self evil is done; by one's self one suffers.",12,0.42857142857142855,142,0.8987341772151899
-1,5,eng,By one's self evil is left undone; by one's self one is purified.,13,0.4642857142857143,143,0.9050632911392406
-1,5,eng,Purity and impurity belong to one's self; no one can purify another.,14,0.5,144,0.9113924050632911
-1,5,eng,You yourself must make an effort.,15,0.5357142857142857,145,0.9177215189873418
-1,5,eng,"The Buddhas are only preachers.""",16,0.5714285714285714,146,0.9240506329113924
-1,5,eng,"""Our karma,"" the shramana said, ""is not the work of Ishvara, or Brahma, or Indra, or of any one of the gods.",17,0.6071428571428571,147,0.930379746835443
-1,5,eng,Our karma is the product of our own actions.,18,0.6428571428571429,148,0.9367088607594937
-1,5,eng,My action is the womb that bears me; it is the inheritance which devolves upon me ; it is the curse of my misdeeds and the blessing of my righteousness.,19,0.6785714285714286,149,0.9430379746835443
-1,5,eng,"My action is the resource by which alone I can work out my salvation.""",20,0.7142857142857143,150,0.9493670886075949
-1,5,eng,"Pandu carried all his treasures back to Kaushambi, and, using with discretion the wealth thus unexpectedly regained, he became richer and more powerful than he had ever been before, and when he was dying at an advanced age he had all his sons and daughters and grandchildren gathered round him and said unto them : "" My dear children, do not blame others for your lack of success.",21,0.75,151,0.9556962025316456
-1,5,eng,Seek the cause of your ills in yourself.,22,0.7857142857142857,152,0.9620253164556962
-1,5,eng,"Unless you are blinded by vanity you will find it, and having found it you will see the way out of it.",23,0.8214285714285714,153,0.9683544303797469
-1,5,eng,"The remedy of your ills, too, lies in yourself.",24,0.8571428571428571,154,0.9746835443037974
-1,5,eng,"Let never your mental eye be covered by the veil of Maya, and remember the words which have proved a talisman in my life: ""He who hurts others injures himself.",25,0.8928571428571429,155,0.9810126582278481
-1,5,eng,He who helps others advances his own interests.,26,0.9285714285714286,156,0.9873417721518988
-1,5,eng,Let the illusion of self disappear.,27,0.9642857142857143,157,0.9936708860759493
-1,5,eng,"And you will naturally walk in the path of truth.""",28,1,158,1
+1,1,eng,"Pandu, a wealthy jeweller of the Brahman caste, was travelling with a servant in a carriage on some lucrative business to Varanasi, and overtaking on his way a monk of venerable appearance who was walking in the same direction, he thought to himself; ' This shramana' looks noble and saintly, Companionship with good men brings luck; should he also be going to Varanasi, I will invite him to ride with me in my carriage.""",1,0.04,1,0.006369426751592357
+1,1,eng,Having saluted the shramana he told him whither he was driving and at what inn he intended to stay in Varanasi.,2,0.08,2,0.012738853503184714
+1,1,eng,"Learning that the shramana, whose name was Narada, also was travelling to Varanasi, he asked him to accept a seat in his carriage.",3,0.12,3,0.01910828025477707
+1,1,eng,"'I am obliged to you for your kindness,"" said the shramana to the Brahman, for I am quite worn out by the long journey.",4,0.16,4,0.025477707006369428
+1,1,eng,"Having no possessions in this world, I cannot repay you in money; but it may happen that I can reward you with some spiritual treasure out of the wealth of the information I have received while following Shakyamuni, the Blessed One, the Great Buddha, the Teacher of mankind.""",5,0.2,5,0.03184713375796178
+1,1,eng,Both travelled together in the carriage and Pandu listened with pleasure to the instructive discourse of Narada.,6,0.24,6,0.03821656050955414
+1,1,eng,"After about an hour's journey, they came to a place where the road had become almost impassable by a washout caused by a recent rain, and a farmer's cart with a broken wheel prevented further progress.",7,0.28,7,0.044585987261146494
+1,1,eng,"Dévala, the owner of the cart, was on his way to Varanasi to sell his rice, and was anxious to reach the town before the dawn of the next morning.",8,0.32,8,0.050955414012738856
+1,1,eng,"If he was delayed a day or two longer, the rice merchants might have left town or bought all the stock they needed.",9,0.36,9,0.05732484076433121
+1,1,eng,"When the jeweller saw that he could not proceed on his way unless the farmer's cart was removed, he began to grow angry and ordered Mahadata, his slave, to push the cart aside, so that his carriage could pass by.",10,0.4,10,0.06369426751592357
+1,1,eng,"The farmer remonstrated because it being so near the slope of the road, it would jeopardise his cargo; but the Brahman would not listen to the farmer and bade his servant overturn the rice cart and push it aside.",11,0.44,11,0.07006369426751592
+1,1,eng,"Mahaduta, an unusually strong man who seemed to take delight in the injury of others, obeyed before the shramana could interfere.",12,0.48,12,0.07643312101910828
+1,1,eng,"When Pandu was about to continue his travel the shramana jumped out of the carriage and said: 'Excuse me, sir, for leaving you here.",13,0.52,13,0.08280254777070063
+1,1,eng,I am under obligations for your kindness in giving me an hour's ride in your carriage.,14,0.56,14,0.08917197452229299
+1,1,eng,"I was tired when you picked me up on the road, but now thanks to your courtesy, I am rested, and recognising in this farmer an incarnation of one of your ancestors I cannot repay your kindness better than by assisting him in his troubles.""",15,0.6,15,0.09554140127388536
+1,1,eng,"The Brahman looked at the shramana in amazement: ""That farmer, you say, is an incarnation of one of my ancestors?",16,0.64,16,0.10191082802547771
+1,1,eng,"That is impossible.""",17,0.68,17,0.10828025477707007
+1,1,eng,"""I know,"" replied the shramana, ""that you are not aware of the numerous important relations which tie your fate to that of the farmer.",18,0.72,18,0.11464968152866242
+1,1,eng,"But the blind man cannot be expected to see; so I regret that you do harm to yourself and I shall try to protect you against the wounds which you are about to inflict upon yourself.""",19,0.76,19,0.12101910828025478
+1,1,eng,"The wealthy merchant was not accustomed to be reprimanded, and feeling that the words of the shramana, although uttered with great kindness, contained a stinging reproach, bade his servant drive on without further delay.",20,0.8,20,0.12738853503184713
+1,1,eng,"The shramana saluted Dévala, the farmer, and began to help him repair his cart and load up the rice, part of which had been thrown out.",21,0.84,21,0.1337579617834395
+1,1,eng,"The work proceeded quickly and Dévala thought: ""This shramana must be a holy man; invisible devas seem to assist him, I will ask him how I deserved the ill treatment at the hands of the proud Brahman.""",22,0.88,22,0.14012738853503184
+1,1,eng,"And he said: ""Venerable sir, can you tell me why I suffer an injustice from a man to whom I have never done any harm?""",23,0.92,23,0.1464968152866242
+1,1,eng,"And the shramana said: ""My dear friend, you do not suffer an injustice, but only receive in your present state of existence the same treatment which you visited upon the jeweller in a former life, and if I am not mistaken in reading the thoughts of your mind, I should say that you would, even to-day, have done the same unto the jeweller if he had been in your place, and if you had had such a strong slave at your command as he has, able to deal with you at his pleasure.""",24,0.96,24,0.15286624203821655
+1,1,eng,"The farmer confessed that if he had had the power, he would have felt little compunction in treating another man who had happened to impede his way as he had been treated by the Brahman, but thinking of the retribution attendant upon unkind deeds, he resolved to be more considerate in the future with his fellow beings.",25,1,25,0.1592356687898089
+1,2,eng,"The rice was loaded and both travelled on to Varanasi, when all of a sudden the horse jumped aside.",1,0.024390243902439025,26,0.16560509554140126
+1,2,eng,"""A snake, a snake!""",2,0.04878048780487805,27,0.17197452229299362
+1,2,eng,shouted the farmer.,3,0.07317073170731707,28,0.17834394904458598
+1,2,eng,"But the shramana looked closely at the object at which the horse shuddered, jumped out of the cart and saw that it was a purse full of gold, and the idea struck him: 'No one else but the wealthy jeweller can have lost this purse.""",4,0.0975609756097561,29,0.18471337579617833
+1,2,eng,"He took the purse and handing it to the farmer said: 'Take this purse and when you come to Varanasi drive up to the inn which I shall point out to you; ask for Pandu, the Brahman, and deliver the purse.",5,0.12195121951219512,30,0.1910828025477707
+1,2,eng,"He will excuse himself for the rudeness with which he treated you, but tell him that you have forgiven him and wish him success in all his undertakings.",6,0.14634146341463414,31,0.19745222929936307
+1,2,eng,"For, let me tell you, the more successful he is, the better you will prosper; your fate depends in many respects upon his fate.",7,0.17073170731707318,32,0.20382165605095542
+1,2,eng,"Should the jeweller demand any explanation, send him to the vildra where he shall find me ready to assist him with advice in case he may feel the need of it.""",8,0.1951219512195122,33,0.21019108280254778
+1,2,eng,"Pandu in the meantime arrived at Varanasi and met Mallika, his business-friend, a rich banker, ""I am a ruined man,"" said Mallika, ""and can do no business with you, unless I can buy a cart of the best rice for the king's table.",9,0.21951219512195122,34,0.21656050955414013
+1,2,eng,"There is a rival banker in Varanasi who learning that I had made a contract with the royal treasurer to deliver the rice to-morrow morning, and being desirous to bring about my destruction, has bought up all the rice in Varanasi, the royal treasurer must have received a bribe, for he will not release me from my contract and to-morrow I shall be a ruined man unless Krishna will send an angel from heaven to help me.""",10,0.24390243902439024,35,0.2229299363057325
+1,2,eng,"While Mallika was still lamenting the poverty to which his rival would reduce him, Pandu missed his purse.",11,0.2682926829268293,36,0.22929936305732485
+1,2,eng,"Searching his carriage without being able to find it, he suspected his slave Mahaduta; and calling the police accused him of theft, and had him bound and cruelly tortured to extort a confession.",12,0.2926829268292683,37,0.2356687898089172
+1,2,eng,"The slave in his agonies cried: ""I am innocent, let me go, for I cannot stand this pain; I am quite innocent at least of this crime, and suffer now for other sins.",13,0.3170731707317073,38,0.24203821656050956
+1,2,eng,"O, that I could beg the farmer's pardon whom, far the sake of my master, I wronged without any cause!",14,0.34146341463414637,39,0.2484076433121019
+1,2,eng,"This torture, I believe, is a punishment for my rudeness.""",15,0.36585365853658536,40,0.25477707006369427
+1,2,eng,"While the police officer was still applying the lash to the back of the slave, the farmer arrived at the inn, and, to the great astonishment of all concerned, delivered the purse.",16,0.3902439024390244,41,0.2611464968152866
+1,2,eng,The slave was at once released from the hands of his torturer.,17,0.4146341463414634,42,0.267515923566879
+1,2,eng,"But being dissatisfied with his master, he secretly left and joined a band of robbers in the mountains, who made him their chief on account of his great strength and courage.",18,0.43902439024390244,43,0.27388535031847133
+1,2,eng,"When Mallika heard that the farmer had the best rice to sell, fit for delivery to the royal table, he bought at once the whole car-load for triple the price that the farmer had ever received, and Pandu, glad at heart to have his money restored, hastened at once to the vihara to receive further explanations from Narada, the shramana.",19,0.4634146341463415,44,0.2802547770700637
+1,2,eng,"Narada said: ""I might give thee an explanation, but knowing that thou art unable to understand a spiritual truth, I prefer to remain silent.",20,0.4878048780487805,45,0.28662420382165604
+1,2,eng,"However, I shall give thee some advice: Treat every man whom thou meetest as thy own self; serve him as thou wouldst demand to be served thyself; for thus thou shalt sow a sowing of good deeds, the rich harvest of which thou wilt not fail to reap.""",21,0.5121951219512195,46,0.2929936305732484
+1,2,eng,"""Give me, O shramana, the explanation,"" said the jeweller, ""and I shall thereby be better able to follow your advice.""",22,0.5365853658536586,47,0.29936305732484075
+1,2,eng,"The shramana said: 'Listen then, I will give you the key to the mystery.",23,0.5609756097560976,48,0.3057324840764331
+1,2,eng,"If you do not understand it, have faith in what I say.",24,0.5853658536585366,49,0.31210191082802546
+1,2,eng,"Self is an illusion, and he whose mind is bent upon following self, follows an ignis fatuus which leads him into the quagmire of sin.",25,0.6097560975609756,50,0.3184713375796178
+1,2,eng,"The illusion of self is the veil of Maya that blinds your eyes and prevents you from recognising the close relations that obtain between yourself and your fellows, and from tracing the identity of your self in the souls of other beings.",26,0.6341463414634146,51,0.3248407643312102
+1,2,eng,Ignorance is the source of sin.,27,0.6585365853658537,52,0.33121019108280253
+1,2,eng,There are few who know the truth.,28,0.6829268292682927,53,0.3375796178343949
+1,2,eng,Let this motto be your talisman: 'He who hurts others injures himself.,29,0.7073170731707317,54,0.34394904458598724
+1,2,eng,He who helps others advances his own interests.,30,0.7317073170731707,55,0.3503184713375796
+1,2,eng,Let the delusion of self disappear from your mind.,31,0.7560975609756098,56,0.35668789808917195
+1,2,eng,And you will naturally walk in the path of truth.',32,0.7804878048780488,57,0.3630573248407643
+1,2,eng,"""To him whose vision is dimmed by the veil of Maya, the spiritual world appears to be cut up into innumerable selves.",33,0.8048780487804879,58,0.36942675159235666
+1,2,eng,"Thus he will be puzzled in many ways concerning the transmigration of soul-life, and will be incapable of understanding the import of an all-comprehensive kindness toward all living beings.""",34,0.8292682926829268,59,0.37579617834394907
+1,2,eng,"The jeweller replied: 'Your words, O venerable sir, have a deep significance and I shall bear them in mind.",35,0.8536585365853658,60,0.3821656050955414
+1,2,eng,"I extended a small kindness which caused me no expense whatever to a poor shramana on my way to Varanasi, and lo!",36,0.8780487804878049,61,0.3885350318471338
+1,2,eng,how propitious has been the result!,37,0.9024390243902439,62,0.39490445859872614
+1,2,eng,"I am deeply in your debt, for without you I should not only have lost my purse, but would have been prevented from doing business in Varanasi which greatly increased my wealth, while if it had been left undone it might have reduced me to a state of wretched poverty.",38,0.926829268292683,63,0.4012738853503185
+1,2,eng,"In addition, your thoughtfulness and the arrival of the farmer's rice-cart preserved the prosperity of my friend Mallika, the banker.",39,0.9512195121951219,64,0.40764331210191085
+1,2,eng,"If all men saw the truth of your maxims, how much better the world would be, how greatly evils would be lessened, and public welfare enhanced!",40,0.975609756097561,65,0.4140127388535032
+1,2,eng,"As I am anxious to let the truth of buddha be understood, I shall found a vihara at my native place, Kaushambi, and invite you to visit me so that I may dedicate the place to the brotherhood of Buddha's disciples.""",41,1,66,0.42038216560509556
+1,3,eng,Years passed on and Pandu's vihara at Kaushambi became a place in which wise shramanas used to stay and it was renowned as a centre of enlightenment for the people of the town.,1,0.02857142857142857,67,0.4267515923566879
+1,3,eng,"At that time the king of a neighboring country had heard of the beauty of Pandu's jewelry, and he sent his treasurer to order a royal diadem wrought in pure gold and set with the most precious stones of India.",2,0.05714285714285714,68,0.43312101910828027
+1,3,eng,"When Pandu had finished the work, he started for the residence of the king, and as he expected to transact other profitable business, took with him a great store of gold pieces.",3,0.08571428571428572,69,0.4394904458598726
+1,3,eng,"The caravan carrying his goods was protected by a strong escort of armed men, but when they reached the mountains they were attacked by a band of robbers lead by Mahaduta, who beat them and took away all the jewelry and the gold, and Pandu escaped with great difficulty.",4,0.11428571428571428,70,0.445859872611465
+1,3,eng,"This misfortune was a blow to Pandu's prosperity, and as he suffered some other severe losses, his wealth was much reduced.",5,0.14285714285714285,71,0.45222929936305734
+1,3,eng,"Pandu was much distressed, but he bore his misfortunes without complaint, thinking to himself: ""I have deserved these losses for the sins committed in my past existence.",6,0.17142857142857143,72,0.4585987261146497
+1,3,eng,"In my younger years I was very hard on other people; when I now reap the harvest of my evil deeds I have no cause for complaint.""",7,0.2,73,0.46496815286624205
+1,3,eng,"As he had grown in kindliness toward all beings, his misfortunes only served to purify his heart; and his chief regret, when thinking of his reduced means, was that he had become unable to do good and to help his friends in the vihara to spread the truths of religion.",8,0.22857142857142856,74,0.4713375796178344
+1,3,eng,"Again years passed on and it happened that Panthaka, a young shramana and a disciple of Narada, was travelling through the mountains of Kaushambi, and he fell among the robbers in the mountains.",9,0.2571428571428571,75,0.47770700636942676
+1,3,eng,"As he had nothing in his possession, the robber-chief beat him severely and let him go.",10,0.2857142857142857,76,0.4840764331210191
+1,3,eng,"On the next morning Panthaka, while pursuing his way through the woods, heard a noise as of quarrelling and fighting men, and going to the place he saw a number of robbers, all of them in a great rage, and in their midst stood Mahaduta, their chief; and the chief was desperately fighting them, like a lion surrounded by hounds, and he slew several of his aggressors with formidable blows, but there were too many against one!",11,0.3142857142857143,77,0.49044585987261147
+1,3,eng,"At last he succumbed and fell to the ground as if dead, covered with fatal wounds.",12,0.34285714285714286,78,0.4968152866242038
+1,3,eng,"As soon as the robbers had left the place the young shramana approached to see whether he could be of any assistance to the wounded men, He found that all the robbers were dead, and there was only a little life left in the chief, He at once went down to the little brooklet which was murmoring near by, fetched fresh water in his bowl and brought it to the dying man.",13,0.37142857142857144,79,0.5031847133757962
+1,3,eng,"Mahaduta opened his eyes and, gnashing his teeth, said: ""Where are those ungrateful dogs whom I have led to victory and success?",14,0.4,80,0.5095541401273885
+1,3,eng,"Without me as their chief they will soon perish like jackals hunted down by skillful hunters.""",15,0.42857142857142855,81,0.5159235668789809
+1,3,eng,"""Do not think of your comrades, the companions of your sinful life,"" said Panthaka, ""but think of your soul and accept in the last moment the chance of salvation that is offered you.",16,0.45714285714285713,82,0.5222929936305732
+1,3,eng,"Here is water to drink, and let me dress your wounds; perhaps I may save your life.""",17,0.4857142857142857,83,0.5286624203821656
+1,3,eng,"""Alas!",18,0.5142857142857142,84,0.535031847133758
+1,3,eng,"alas!""",19,0.5428571428571428,85,0.5414012738853503
+1,3,eng,"replied Mahaduta, ""are you not the man whom I beat but yesterday and now you come to my assistance, to assuage my pain?",20,0.5714285714285714,86,0.5477707006369427
+1,3,eng,"You bring me fresh water to quench my thirst, and try to save my life!",21,0.6,87,0.554140127388535
+1,3,eng,"It is useless, honorable sir, I am a doomed man.",22,0.6285714285714286,88,0.5605095541401274
+1,3,eng,The churls have wounded me unto death the ungrateful cowards!,23,0.6571428571428571,89,0.5668789808917197
+1,3,eng,"They have dealt me the blows which I taught them.""",24,0.6857142857142857,90,0.5732484076433121
+1,3,eng,"""You reap what you have sown;"" continued the shramana, ""had you taught your comrades acts of kindness, you would have received from them acts of kindness, but having taught them the lesson of slaughter, it is but your own deed that you are slain by their hands.""",25,0.7142857142857143,91,0.5796178343949044
+1,3,eng,"""True, very true,"" said the robber chief, my fate is well deserved; but how sad is my lot, that I must reap the full harvest of all my evil deeds in future existences!",26,0.7428571428571429,92,0.5859872611464968
+1,3,eng,"Advise me, O holy sir, what I can do to lighten the sins of my life which oppress me like a great rock placed upon my breast, taking away the breath of my lungs.""",27,0.7714285714285715,93,0.5923566878980892
+1,3,eng,"Said Panthaka: ""Root out your sinful desires; destroy all evil passions, and fill your soul with kindness toward all your fellow beings.""",28,0.8,94,0.5987261146496815
+1,3,eng,"The robber chief said: ""I have done much evil and no good.",29,0.8285714285714286,95,0.6050955414012739
+1,3,eng,How can I extricate myself from the net of sorrow which I have woven out of the evil desires of my own heart?,30,0.8571428571428571,96,0.6114649681528662
+1,3,eng,"My Karma will lead me to hell and I shall never be able to walk on the path of salvation.""",31,0.8857142857142857,97,0.6178343949044586
+1,3,eng,"Said the shramana: ""Indeed your Karma will in its future incarnations reap the seeds of evil that you have sown.",32,0.9142857142857143,98,0.6242038216560509
+1,3,eng,There is no escape for an evil doer from the consequences of his own actions.,33,0.9428571428571428,99,0.6305732484076433
+1,3,eng,But there is no cause for despair.,34,0.9714285714285714,100,0.6369426751592356
+1,3,eng,The man who is converted and has rooted out the illusion of self with all its lusts and sinful desires will be a source of blessing to himself and others.,35,1,101,0.643312101910828
+1,4,eng,As an illustration I will tell you the story of the great robber Kandata who died without repentance and was reborn as a demon in hell where he suffered for his evil deeds the most terrible agonies and pains.,1,0.03571428571428571,102,0.6496815286624203
+1,4,eng,He had been in hell several kalpas and was unable to rise out of his wretched condition when Buddha appeared upon earth and attained to the blessed state of enlightenment.,2,0.07142857142857142,103,0.6560509554140127
+1,4,eng,"At that memorable moment a ray of light fell dawn into hell quickening all the demons with fear and hope, and the robber Kandata cried aloud: 'O blessed Buddha, have mercy upon me!",3,0.10714285714285714,104,0.6624203821656051
+1,4,eng,"I suffer greatly and although I have done evil, I am anxious to walk in the noble path of righteousness.",4,0.14285714285714285,105,0.6687898089171974
+1,4,eng,But I cannot extricate myself from the net of sorrow.,5,0.17857142857142858,106,0.6751592356687898
+1,4,eng,"Help me, O Lord; have mercy on me!'",6,0.21428571428571427,107,0.6815286624203821
+1,4,eng,"Now it is, the law of Karma that evil deeds lead to destruction, for absolute evil is so bad that it cannot exist.",7,0.25,108,0.6878980891719745
+1,4,eng,Absolute evil involves impossibility of existence.,8,0.2857142857142857,109,0.6942675159235668
+1,4,eng,But good deeds lead to life.,9,0.32142857142857145,110,0.7006369426751592
+1,4,eng,"Thus there is a final end of every decd that is done, but there is no end in the development of good deeds.",10,0.35714285714285715,111,0.7070063694267515
+1,4,eng,"The least act of goodness bears fruits containing new seeds of goodness and they continue to grow, they nourish the soul in its weary transmigrations until it reaches the final deliverance from all evil in Nirvana.",11,0.39285714285714285,112,0.7133757961783439
+1,4,eng,"When Buddha, the Lord, heard the prayer of the demon suffering in hell, he sent down a spider on a cobweb and the spider said: 'Take hold of the web and climb up.'",12,0.42857142857142855,113,0.7197452229299363
+1,4,eng,"When the spider had again disappeared out of sight, Kandata made great efforts to climb up and he succeeded.",13,0.4642857142857143,114,0.7261146496815286
+1,4,eng,"The web was so strong that it held, and he ascended higher and higher.",14,0.5,115,0.732484076433121
+1,4,eng,"Suddenly he felt the thread trembling and shaking, for behind him other fellow sufferers of his were beginning to climb up.",15,0.5357142857142857,116,0.7388535031847133
+1,4,eng,Kandata became frightened.,16,0.5714285714285714,117,0.7452229299363057
+1,4,eng,"He saw the thinness of the web, and observed that it was elastic, for under the increased weight it stretched out; yet it still seemed strong enough to carry him.",17,0.6071428571428571,118,0.7515923566878981
+1,4,eng,"Kandata had heretofore only looked up; he now looked down and saw following close upon his heels, also climbing up on the cobweb a numberless mob of the denizens of hell.",18,0.6428571428571429,119,0.7579617834394905
+1,4,eng,"How can this thin thread bear the weight of all, he thought to himself, and seized with fear he shouted loudly: 'Let go the cobweb.",19,0.6785714285714286,120,0.7643312101910829
+1,4,eng,It is mine!',20,0.7142857142857143,121,0.7707006369426752
+1,4,eng,At once the cobweb broke and Kandata fell back into hell.,21,0.75,122,0.7770700636942676
+1,4,eng,The illusion of self was still upon Kandata.,22,0.7857142857142857,123,0.7834394904458599
+1,4,eng,He did not know the miraculous power of a sincere longing to rise upwards and enter the noble path of righteousness.,23,0.8214285714285714,124,0.7898089171974523
+1,4,eng,"It is thin like a cobweb but it will carry millions of people, and the more there are that climb it, the easier will be the efforts of every one of them.",24,0.8571428571428571,125,0.7961783439490446
+1,4,eng,"But as soon as in a man's heart the idea arises; 'This is mine; let the bliss of righteousness be mine alone and let no one else partake of it,' the thread breaks, and you fall back into your old condition of selfhood, for selfhood is damnation and truth is bliss.",25,0.8928571428571429,126,0.802547770700637
+1,4,eng,What is hell?,26,0.9285714285714286,127,0.8089171974522293
+1,4,eng,"It is nothing but egotism, and Nirvana is a life of righteousness.""",27,0.9642857142857143,128,0.8152866242038217
+1,4,eng,"""Let me take hold of a spiderweb,"" said the dying robber chief, when the shramana had finished his story, ""and I shall pull myself up out of the depth of hell.""",28,1,129,0.821656050955414
+1,5,eng,Mahaduta lay for a while quiet to collect his thoughts.,1,0.03571428571428571,130,0.8280254777070064
+1,5,eng,"Then he continued: ""Listen, honorable sir, I will make a confession: I was the servant of Pandu, the jeweller of Kaushambi, but when he unjustly had me tortured I ran away and became a chief of robbers. heard through my spies that he was passing through the mountains I succeeded in robbing him of a great part of his wealth.",2,0.07142857142857142,131,0.8343949044585988
+1,5,eng,"Will you now go to him and tell him that I have forgiven him from the bottom of my heart the injury which he has unjustly inflicted upon me, and ask him, too, to pardon me for having robbed him.",3,0.10714285714285714,132,0.8407643312101911
+1,5,eng,"While I stayed with him his heart was as hard as stone, and I learned to imitate the selfishness of his character.",4,0.14285714285714285,133,0.8471337579617835
+1,5,eng,I have heard that he has become benevolent and is now pointed out as an example of goodness and justice.,5,0.17857142857142858,134,0.8535031847133758
+1,5,eng,I do not wish to remain in his debt.,6,0.21428571428571427,135,0.8598726114649682
+1,5,eng,"Therefore inform him that I have kept the gold crown, which he wrought for the king, and all his treasures, and have hidden them in a cave near by.",7,0.25,136,0.8662420382165605
+1,5,eng,"There were only two of the robbers under my command who knew of it, and both are now dead.",8,0.2857142857142857,137,0.8726114649681529
+1,5,eng,"Let Pandu take a number of armed men and come to the place and take back the property of which I have deprived him.""",9,0.32142857142857145,138,0.8789808917197452
+1,5,eng,Then Mahaduta described the situation of the cave and died in the arms of Panthaka.,10,0.35714285714285715,139,0.8853503184713376
+1,5,eng,"As soon as Panthaka, the young shramana, had reached Kaushambi, he went to the jeweller and gave him a full account of his recent adventure in the forest.",11,0.39285714285714285,140,0.89171974522293
+1,5,eng,"And Pandu went with an escort of armed men and secured the treasures which the robber-chief had concealed in the cave; and they buried the robber-chief and his slain comrades with all honors, and Panthaka spoke at the grave, discoursing on the words of Buddha: ""By one's self evil is done; by one's self one suffers.",12,0.42857142857142855,141,0.8980891719745223
+1,5,eng,By one's self evil is left undone; by one's self one is purified.,13,0.4642857142857143,142,0.9044585987261147
+1,5,eng,Purity and impurity belong to one's self; no one can purify another.,14,0.5,143,0.910828025477707
+1,5,eng,You yourself must make an effort.,15,0.5357142857142857,144,0.9171974522292994
+1,5,eng,"The Buddhas are only preachers.""",16,0.5714285714285714,145,0.9235668789808917
+1,5,eng,"""Our karma,"" the shramana said, ""is not the work of Ishvara, or Brahma, or Indra, or of any one of the gods.",17,0.6071428571428571,146,0.9299363057324841
+1,5,eng,Our karma is the product of our own actions.,18,0.6428571428571429,147,0.9363057324840764
+1,5,eng,My action is the womb that bears me; it is the inheritance which devolves upon me ; it is the curse of my misdeeds and the blessing of my righteousness.,19,0.6785714285714286,148,0.9426751592356688
+1,5,eng,"My action is the resource by which alone I can work out my salvation.""",20,0.7142857142857143,149,0.9490445859872612
+1,5,eng,"Pandu carried all his treasures back to Kaushambi, and, using with discretion the wealth thus unexpectedly regained, he became richer and more powerful than he had ever been before, and when he was dying at an advanced age he had all his sons and daughters and grandchildren gathered round him and said unto them : "" My dear children, do not blame others for your lack of success.",21,0.75,150,0.9554140127388535
+1,5,eng,Seek the cause of your ills in yourself.,22,0.7857142857142857,151,0.9617834394904459
+1,5,eng,"Unless you are blinded by vanity you will find it, and having found it you will see the way out of it.",23,0.8214285714285714,152,0.9681528662420382
+1,5,eng,"The remedy of your ills, too, lies in yourself.",24,0.8571428571428571,153,0.9745222929936306
+1,5,eng,"Let never your mental eye be covered by the veil of Maya, and remember the words which have proved a talisman in my life: ""He who hurts others injures himself.",25,0.8928571428571429,154,0.9808917197452229
+1,5,eng,He who helps others advances his own interests.,26,0.9285714285714286,155,0.9872611464968153
+1,5,eng,Let the illusion of self disappear.,27,0.9642857142857143,156,0.9936305732484076
+1,5,eng,"And you will naturally walk in the path of truth.""",28,1,157,1
 2,1,rus,"Панду, богатый ювелир браминской касты, ехал с своим слугой в Бенарес.",1,0.037037037037037035,1,0.006944444444444444
 2,1,rus,"Догнав по пути монаха почтенного вида, который шел по тому же направлению, он подумал сам с собой: «Этот монах имеет благородный и святой вид.",2,0.07407407407407407,2,0.013888888888888888
 2,1,rus,"Общение с добрыми людьми приносит счастье; если он также идет в Бенарес, я приглашу его ехать со мной в моей колеснице».",3,0.1111111111111111,3,0.020833333333333332
@@ -542,7 +541,7 @@ story,chunk,lang,sentences,chunk_sent_num,chunk_prop_num,sent_num,prop_num
 4,3,eng,"""I have merited this trial,"" he thought, ""by the sins of my past life.",10,0.21739130434782608,81,0.47093023255813954
 4,3,eng,"In my youth I was hard upon the people, and I should not complain at reaping to-day the fruit of my bad actions.""",11,0.2391304347826087,82,0.47674418604651164
 4,3,eng,"Now Pandou had become more kindly disposed towards his fellow-creatures, and his misfortunes only accomplished the purification of his heart.",12,0.2608695652173913,83,0.48255813953488375
-4,3,eng,"Years again went by, and it came to pass that Pantaka, a young monk—a disciple of Narada—while traveling in the mountains of Kolshambi, fell into the hands of brigands.",13,0.2826086956521739,84,0.4883720930232558
+4,3,eng,"Years again went by, and it came to pass that Pantaka, a young monk a disciple of Narada while traveling in the mountains of Kolshambi, fell into the hands of brigands.",13,0.2826086956521739,84,0.4883720930232558
 4,3,eng,"As he possessed nothing, the chief of the brigands released him after having caused him to be beaten.",14,0.30434782608695654,85,0.4941860465116279
 4,3,eng,"The following morning, Pantaka, in passing through the forest heard the noise of a conflict.",15,0.32608695652173914,86,0.5
 4,3,eng,"He went in the direction of the combatants and beheld a large number of brigands, who were madly attacking their chief, Madagouta.",16,0.34782608695652173,87,0.5058139534883721
@@ -556,7 +555,7 @@ story,chunk,lang,sentences,chunk_sent_num,chunk_prop_num,sent_num,prop_num
 4,3,eng,"""Think no more of your companions, the accomplices of your criminal life,"" said Pantaka.",24,0.5217391304347826,95,0.5523255813953488
 4,3,eng,"'Think rather of your last hour, of the salvation of your soul.",25,0.5434782608695652,96,0.5581395348837209
 4,3,eng,"Drink this water, and let me dress your wounds; perhaps I may still save your life.""",26,0.5652173913043478,97,0.563953488372093
-4,3,eng,"""It is useless,"" replied Madagouta, ""I am lost—the miserable wretches have wounded me unto death.",27,0.5869565217391305,98,0.5697674418604651
+4,3,eng,"""It is useless,"" replied Madagouta, ""I am lost the miserable wretches have wounded me unto death.",27,0.5869565217391305,98,0.5697674418604651
 4,3,eng,Oh!,28,0.6086956521739131,99,0.5755813953488372
 4,3,eng,the cowards!,29,0.6304347826086957,100,0.5813953488372093
 4,3,eng,Oh!,30,0.6521739130434783,101,0.5872093023255814
