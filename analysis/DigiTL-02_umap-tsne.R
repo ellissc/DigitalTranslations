@@ -11,6 +11,7 @@ library(dtw)
 library(reshape2)
 library(ggrepel)
 
+
 ## What is this script for?
 # Inputs: preprocessed / split sentences
 #         MBERT embeddings
@@ -551,6 +552,65 @@ ggsave(dtw.plot,
        units = "in",
        dpi = 300,
        width = 10, height = 7)
+
+dtw.df |> 
+  mutate(x.story = as.numeric(substr(story, 4,5)),
+         y.story = as.numeric(substr(variable, 4,5)),
+         translation.steps = (x.story - y.story),
+         pair = paste(story, variable)) |> 
+  filter(translation.steps < 0) |> 
+  ggplot(aes(x = abs(translation.steps), y = value))+
+  geom_point(size = 2, shape = 21, fill = "lightblue")+
+  theme_bw(base_size = 14)+
+  geom_smooth(method = "lm", color = "darkblue", se = F)+
+  geom_label_repel(aes(label = pair), min.segment.length = 0.1)+
+  xlab("Translation steps")+
+  ylab("DTW Distance")+
+  scale_x_continuous(breaks = 1:3)+
+  theme(panel.grid.minor.x = element_blank())
+
+
+## Trying VAR on the UMAP reduced data ----
+library(vars) ## Not good practice, but loading it here since it masks SELECT
+
+original.data <- umap.embeds |> 
+  filter(story == 1) |> 
+  dplyr::select(umap.x, umap.y)
+
+VARselect(original.data, type = "both")
+
+var.model <- VAR(original.data, p = 5, type = "both")
+summary(var.model)
+
+var.pred <- predict(var.model, n.ahead = 12)
+par(mai=rep(0.4, 4)); plot(var.pred)
+par(mai=rep(0.4, 4)); fanchart(var.pred)
+
+predict.x <- function(model, subset.df){
+  subset
+  
+  
+}
+
+coef.var <- coef(var.model)
+
+coef.var$umap.x
+
+
+preds <- predict(var.model)
+
+pred.df <- data.frame()
+
+for (i in 6:nrow(original.data)){
+  subset <- original.data[(i-5):i,]
+  print(subset)
+  # temp.pred <- predict(var.model,
+  #                      subset, n.ahead = 1)
+  # temp.df <- data.frame(pred.x = data.frame(temp.pred$fcst)$umap.x.fcst,
+  #                       pred.y = data.frame(temp.pred$fcst)$umap.y.fcst)
+  # pred.df <- rbind(pred.df,
+  #                  temp.df)
+}
 
 
 ## Chunk DTW ----

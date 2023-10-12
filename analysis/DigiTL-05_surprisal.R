@@ -62,12 +62,31 @@ all.clean.split_wEmb <- rbind(eng1.clean.split,
                             eng4.clean.split)
 
 
+## Trying the VAR package ----
+nhor <- 12
+
+df.lev <- eng1.clean.split |> 
+  dplyr::select(starts_with("x"))
+m.lev <-  (as.matrix(df.lev))
+nr_lev <- nrow(df.lev)
+
+VARselect(df.lev, type = "both")
+
+library(urca)
+data(denmark)
+df.lev <- denmark[,c("LRM","LRY","IBO","IDE")]
+m.lev  <- as.matrix(df.lev)
+nr_lev <- nrow(df.lev)
+
+VARselect(df.lev, type = "both")
+
+var.model_lev <- VAR(df.lev, p = 2, type = "both")
 
 
 ## Surprisal analysis ----
 # Predict next-sentence vector based on ‘momentum’ from previous four sentences
 # Cosine similarity between predicted embedding and the real embedding
-# Correlate the “surprise” of a sentence in Story A with the surprise of the paired sentence in Story B — this captures how well the sentence-by-sentence surprise of Story A compares to Story B.
+# Correlate the "surprise" of a sentence in Story A with the surprise of the paired sentence in Story B — this captures how well the sentence-by-sentence surprise of Story A compares to Story B.
 # Weighted sum of preceding four sentence vectors
 # Sn + 0.7 vec(Sn-1 Sn) + 0.2 vec(Sn-2 Sn) + 0.05 vec(Sn-3 Sn) + 0.05 vec(Sn-4 Sn)
 # Vector auto-regressive function of order N, to predict the next embedding

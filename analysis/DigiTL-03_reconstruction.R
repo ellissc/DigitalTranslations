@@ -255,18 +255,18 @@ ggsave(grid.plot3,
 #     filter(value == max.sim)
 # }
 
-reconstruct_chunk <- function(temp_melted){
-  temp_melted |> 
-    group_by(x.num, x.id, y.id) |> # x as source, y as reconstruction targets
-    mutate(max.sim = max(value)) |> 
-    ungroup() |> 
-    filter(value == max.sim)
-}
-
-chunk_scores <- chunk_melted |> 
-  reconstruct_chunk() |> 
-  mutate(num.prop.diff = y.num.prop - x.num.prop,
-         num.prop.diff.abs = abs(num.prop.diff))
+# reconstruct_chunk <- function(temp_melted){
+#   temp_melted |> 
+#     group_by(x.num, x.id, y.id) |> # x as source, y as reconstruction targets
+#     mutate(max.sim = max(value)) |> 
+#     ungroup() |> 
+#     filter(value == max.sim)
+# }
+# 
+# chunk_scores <- chunk_melted |> 
+#   reconstruct_chunk() |> 
+#   mutate(num.prop.diff = y.num.prop - x.num.prop,
+#          num.prop.diff.abs = abs(num.prop.diff))
 
 reconstruct_full <- function(temp_melted){
   temp_melted |> 
@@ -283,24 +283,24 @@ test_full <- full_melted.df |>
 
 
 test_full |> 
-  mutate(label = paste(x.story, y.story, sep = " v. ")) |> 
+  mutate(label = paste(y.story, x.story, sep = " from ")) |> 
   mutate(label = factor(label,
-                        levels = c("english1 v. english1",
-                                   "english1 v. russian2",
-                                   "english1 v. french3",
-                                   "english1 v. english4",
-                                   "russian2 v. english1",
-                                   "russian2 v. russian2",
-                                   "russian2 v. french3",
-                                   "russian2 v. english4",
-                                   "french3 v. english1",
-                                   "french3 v. russian2",
-                                   "french3 v. french3",
-                                   "french3 v. english4",
-                                   "english4 v. english1",
-                                   "english4 v. russian2",
-                                   "english4 v. french3",
-                                   "english4 v. english4"))) |> 
+                        levels = c("english1 from english1",
+                                   "russian2 from english1",
+                                   "french3 from english1",
+                                   "english4 from english1",
+                                   "english1 from russian2",
+                                   "russian2 from russian2",
+                                   "french3 from russian2",
+                                   "english4 from russian2",
+                                   "english1 from french3",
+                                   "russian2 from french3",
+                                   "french3 from french3",
+                                   "english4 from french3",
+                                   "english1 from english4",
+                                   "russian2 from english4",
+                                   "french3 from english4",
+                                   "english4 from english4"))) |> 
   ggplot(aes(x = x.num.prop, y = y.num.prop))+
   # geom_point(aes(size = as.numeric(max.sim)))+
   geom_line()+

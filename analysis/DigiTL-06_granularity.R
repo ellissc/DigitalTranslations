@@ -154,7 +154,7 @@ paths.A <- grain.smoothed |>
   scale_alpha(guide="none") +
   theme_bw(base_size = 15)+
   labs(caption = "Alpha as proportional sentence number")+
-  ggtitle("Overlaid normalized paths")+
+  ggtitle("Scale of preservation", subtitle = "Adjusting number of sentences per embedding")+
   facet_wrap(~label, scales = "free")
 
 paths.A
@@ -227,22 +227,42 @@ dtw.df <- dtw.df |>
 
 dtw.plot <- ggplot(dtw.df,
        aes(x = grains, y = distance, color = pair, shape = pair, group = pair))+
-  geom_smooth(se = F)+
+  geom_smooth(se = F, linetype = "dashed", method = "lm")+
   geom_point(size = 2)+
   scale_color_brewer(type = "qual", palette = 3, name = "Pair")+
   scale_shape_manual(name = "Pair", values = c(15, 16, 17, 22))+
-  theme_bw()+
+  theme_bw(base_size = 14)+
   xlab("Tile size (sentences per tile)")+
-  ylab("DTW")
+  ylab("DTW Distance")
+
+dtw.plot
   
 ggsave(dtw.plot,
        filename = here("../figures/karma.dtw-grainsize.png"),
        units = "in",
        dpi = 300,
-       width = 12, height = 7)
+       width = 12, height = 6)
 
 
+dtw.plot2 <- dtw.df |> 
+  filter(grains < 4) |> 
+  ggplot(aes(x = grains, y = distance, color = pair, 
+             shape = pair, group = pair))+
+  geom_smooth(se = F, method = "lm")+
+  geom_point(size = 2)+
+  scale_color_brewer(type = "qual", palette = 3, name = "Pair")+
+  scale_shape_manual(name = "Pair", values = c(15, 16, 17, 22))+
+  theme_bw(base_size = 14)+
+  xlab("Tile size (sentences per tile)")+
+  ylab("DTW Distance")
 
+dtw.plot2
+
+ggsave(dtw.plot2,
+       filename = here("../figures/karma.dtw-grainsize-small.png"),
+       units = "in",
+       dpi = 300,
+       width = 12, height = 6)
 
 
 
