@@ -2,8 +2,8 @@ library(tidyverse)
 library(here)
 setwd(here())
 library(janitor)
-library(vars)
 library(lsa)
+library(tsDyn)
 
 ## What is this script for?
 # Inputs: preprocessed / split sentences
@@ -62,15 +62,50 @@ all.clean.split_wEmb <- rbind(eng1.clean.split,
                             eng4.clean.split)
 
 
+## Momentum ----
+
+# Compare the change vectors between sentence embeddings
+
+# Sentences a, b, c
+
+# change vector between a and b
+# cos(ab, bc) = cos(b - a, c - b)
+# Cosine as 1 through -1, cos(theta) = 1, continuation, 0 as unexpected, -1 as reminiscing
+# Reduce each story to a vector of momentum time series
+
+# DTW on the different momentum time series
+
+# Surprisal as abstracting away from the coordinates, quantifying the shape
+
+
+
+
+
 ## Trying the VAR package ----
 nhor <- 12
 
+
+
 df.lev <- eng1.clean.split |> 
   dplyr::select(starts_with("x"))
-m.lev <-  (as.matrix(df.lev))
-nr_lev <- nrow(df.lev)
 
-VARselect(df.lev, type = "both")
+df.pca <- prcomp(df.lev)
+
+pca.red <- df.pca$x[,1:3]
+
+sum(df.pca$sdev[1:3])
+
+# VARselect(pca.red, type = "both", lag.max = 1)
+
+var.model <- lineVar(pca.red, lag = 1)
+summary(var.model)
+
+preds <- predict.VAR(var.model, newdata = data.frame(pca.red[1,]) |> t() 
+                 )
+
+# Save predictions from the above predict
+preds$fcst$PC1
+
 
 library(urca)
 data(denmark)
