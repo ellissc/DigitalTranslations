@@ -4,6 +4,7 @@ setwd(here())
 library(janitor)
 library(lsa)
 library(tsDyn)
+library(dtw)
 
 ## What is this script for?
 # Inputs: preprocessed / split sentences
@@ -65,9 +66,8 @@ all.clean.split_wEmb <- rbind(eng1.clean.split,
 ## Momentum ----
 
 # Compare the change vectors between sentence embeddings
-
+## Example
 # Sentences a, b, c
-
 # change vector between a and b
 # cos(ab, bc) = cos(b - a, c - b)
 # Cosine as 1 through -1, cos(theta) = 1, continuation, 0 as unexpected, -1 as reminiscing
@@ -77,194 +77,266 @@ all.clean.split_wEmb <- rbind(eng1.clean.split,
 
 # Surprisal as abstracting away from the coordinates, quantifying the shape
 
-
-
-
-
-## Trying the VAR package ----
-nhor <- 12
-
-
-
-df.lev <- eng1.clean.split |> 
-  dplyr::select(starts_with("x"))
-
-df.pca <- prcomp(df.lev)
-
-pca.red <- df.pca$x[,1:3]
-
-sum(df.pca$sdev[1:3])
-
-# VARselect(pca.red, type = "both", lag.max = 1)
-
-var.model <- lineVar(pca.red, lag = 1)
-summary(var.model)
-
-preds <- predict.VAR(var.model, newdata = data.frame(pca.red[1,]) |> t() 
-                 )
-
-# Save predictions from the above predict
-preds$fcst$PC1
-
-
-library(urca)
-data(denmark)
-df.lev <- denmark[,c("LRM","LRY","IBO","IDE")]
-m.lev  <- as.matrix(df.lev)
-nr_lev <- nrow(df.lev)
-
-VARselect(df.lev, type = "both")
-
-var.model_lev <- VAR(df.lev, p = 2, type = "both")
-
-
-## Surprisal analysis ----
-# Predict next-sentence vector based on ‘momentum’ from previous four sentences
-# Cosine similarity between predicted embedding and the real embedding
-# Correlate the "surprise" of a sentence in Story A with the surprise of the paired sentence in Story B — this captures how well the sentence-by-sentence surprise of Story A compares to Story B.
-# Weighted sum of preceding four sentence vectors
-# Sn + 0.7 vec(Sn-1 Sn) + 0.2 vec(Sn-2 Sn) + 0.05 vec(Sn-3 Sn) + 0.05 vec(Sn-4 Sn)
-# Vector auto-regressive function of order N, to predict the next embedding
-
-# Example:
-get_vector <- function(matrix, row.n){
-  return(matrix[row.n,] |> as.vector())
+momentum <- function(original_df){
+  diff.df <- diff(as.matrix(original_df |> 
+                           select(starts_with("x"))), 
+               lag = 1) |> 
+    as.data.frame()
+  
+  story = unique(original_df$story)
+  lang = unique(original_df$lang)
+  
+  temp.vec <- c()
+    
+    for (ii in 1:(nrow(diff.df) - 1) ){
+      print(c(ii, ii+1))
+      
+      ab <- unlist(diff.df[ii,])
+      
+      bc <- unlist(diff.df[ii+1,])
+      
+      temp.vec <- append(temp.vec, cosine(ab, bc))
+    }
+    
+    momentum.df <- data.frame(story = story, lang = lang,
+                              momentum = temp.vec) |> 
+      mutate(diff_num = 1:n(), diff_prop = diff_num/n())
+    
+    return(momentum.df)
 }
 
-var.basic <- function(sn, sn1, sn2, sn3, sn4, weight.vector){
-  sm <- (weight.vector[1]*sn) + 
-    (weight.vector[2]*(sn1 - sn)) + 
-    (weight.vector[3]*(sn2 - sn)) + 
-    (weight.vector[4]*(sn3 - sn)) + 
-    (weight.vector[5]*(sn4 - sn))
-  
-  return(sm)
-}
+eng1.momentum <- momentum(eng1.clean.split)
+rus2.momentum <- momentum(rus2.clean.split)
+fre3.momentum <- momentum(fre3.clean.split)
+eng4.momentum <- momentum(eng4.clean.split)
 
-var.basic.alt <- function(sn, sn1, sn2, sn3, sn4, weight.vector){
-  sm <- (weight.vector[1]*sn) + 
-    (weight.vector[2]*(sn1)) + 
-    (weight.vector[3]*(sn2)) + 
-    (weight.vector[4]*(sn3)) + 
-    (weight.vector[5]*(sn4))
-  
-  return(sm)
-}
+momentum.joined <- rbind(eng1.momentum, rus2.momentum, 
+                         fre3.momentum, eng4.momentum)
 
-var.auto <- function(embeddings){
-  surprisals <- vector()
-  momentum <- vector()
-  embedding_matrix <- embeddings |> 
-    data.matrix()
-  
-  weights = c(1, 0.7, 0.2, 0.05, 0.05)
-  
-  for (n in 5:(nrow(embedding_matrix) - 1)){
-    print(n)
-    # sentence n
-    s.n <- get_vector(embedding_matrix, n)
-    s.n1 <- get_vector(embedding_matrix, (n-1))
-    s.n2 <- get_vector(embedding_matrix, (n-2))
-    s.n3 <- get_vector(embedding_matrix, (n-3))
-    s.n4 <- get_vector(embedding_matrix, (n-4))
-    
-    s.m <- var.basic(s.n, s.n1, s.n2, s.n3, s.n4, weights)
-    
-    s.m_true <- get_vector(embedding_matrix, n + 1)
-    
-    sim <- cosine(s.m, s.m_true)
-    # print(sim)
-    surprisals <- append(sim, surprisals)
-    
-    m.diff <- cosine((s.m - s.n), (s.m_true - s.n))
-    momentum <- append(m.diff, momentum)
-  }
-  
-  
-  return(data.frame(prop.index = (1:length(surprisals))/length(surprisals),
-             surprisals = surprisals, 
-             momentums = momentum))
-}
-
-eng1.surprisals <- var.auto(eng1.embeds) |> 
-  mutate(story = "eng1")
-
-rus2.surprisals <- var.auto(rus2.embeds) |> 
-  mutate(story = "rus2")
-
-fre3.surprisals <- var.auto(fre3.embeds) |> 
-  mutate(story = "fre3")
-
-eng4.surprisals <- var.auto(eng4.embeds) |> 
-  mutate(story = "eng4")
-
-full.surprisals <- rbind(eng1.surprisals,
-                         rus2.surprisals,
-                         fre3.surprisals,
-                         eng4.surprisals)
-
-full.surprisals |> 
-  ggplot(aes(x = prop.index, y = surprisals))+
+ggplot(momentum.joined, aes(x = diff_prop, y = momentum, 
+                            color = factor(story)))+
   geom_line()+
-  theme_bw()+
-  ylab("Surprisals\ncos(predicted, actual)")+
-  xlab("Index (proportional)")+
-  facet_wrap(~story, scales = "free")
+  theme_bw(base_size = 14)+
+  scale_color_brewer(type = "qual", palette = 2, name = "Story")+
+  xlab("Story proportion")+
+  ylab("Momentum")
 
-full.surprisals |> 
-  ggplot(aes(x = prop.index, y = momentums))+
-  geom_line()+
-  theme_bw()+
-  ylab("Momentum\ncos(s.m_true - s.n, s.m_pred - s.n)")+
-  xlab("Index (proportional)")+
-  facet_wrap(~story, scales = "free")
+ggsave(path = "../figures/",
+       filename = "momentum.png",units = "in", 
+       width = 30, height = 5, dpi = 300)
 
-## Manual test:
-surprisals <- vector()
-embedding_matrix <- eng1.embeds |> data.matrix()
 
-weights = c(1, 0.7, 0.2, 0.05, 0.05)
 
-for (n in 5:(nrow(embedding_matrix) - 1)){
-  print(n)
-  # sentence n
-  s.n <- get_vector(embedding_matrix, n)
-  # sentence n-1
-  s.n1 <- get_vector(embedding_matrix, n-1)
-  # sentence n-2
-  s.n2 <- get_vector(embedding_matrix, n-2)
-  # sentence n-3
-  s.n3 <- get_vector(embedding_matrix, n-3)
-  # sentence n-4
-  s.n4 <- get_vector(embedding_matrix, n-4)
+
+
+## ENG1, RUS2 ----
+eng1.rus2 <- dtw(momentum.joined |> filter(story == 1) |> 
+                   select(momentum),
+                 momentum.joined |> filter(story == 2) |> 
+                   select(momentum),
+                 keep = TRUE)
+eng1.rus2.distance <- eng1.rus2$normalizedDistance
+
+## RUS2, FRE3 ----
+
+rus2.fre3 <- dtw(momentum.joined |> filter(story == 2) |> 
+                   select(momentum),
+                 momentum.joined |> filter(story == 3) |> 
+                   select(momentum),
+                 keep = TRUE)
+rus2.fre3.distance <- rus2.fre3$normalizedDistance
+
+## FRE3, ENG4 ----
+fre3.eng4 <- dtw(momentum.joined |> filter(story == 3) |> 
+                   select(momentum),
+                 momentum.joined |> filter(story == 4) |> 
+                   select(momentum),
+                 keep = TRUE)
+fre3.eng4.distance <- fre3.eng4$normalizedDistance
+
+## ENG4, ENG1 ----
+eng4.eng1 <- dtw(momentum.joined |> filter(story == 4) |> 
+                   select(momentum),
+                 momentum.joined |> filter(story == 1) |> 
+                   select(momentum),
+                 keep = TRUE)
+eng4.eng1.distance <- eng4.eng1$normalizedDistance
+
+dtw.df <- data.frame(x.story = c("English 1","Russian 2", "French 3","English 4"),
+                     y.story = c("Russian 2", "French 3","English 4","English 1"),
+                     distance = c(eng1.rus2.distance,rus2.fre3.distance,
+                                  fre3.eng4.distance, eng4.eng1.distance))
+
+dtw.df |> 
+  mutate(x.story = factor(x.story,
+                          levels = c("English 1","Russian 2", 
+                                     "French 3","English 4")),
+         y.story = factor(y.story,
+                          levels = c("English 1","Russian 2", 
+                                     "French 3","English 4"))) |> 
+  ggplot(aes(x = x.story, y = y.story, fill = distance))+
+  geom_tile()+
+  theme_bw(base_size = 14)+
+  scale_fill_distiller(type = "seq", palette = 2, name = "Momentum\nDistance")+
+  xlab("Story A")+
+  ylab("Story B")+
+  geom_label(aes(label = round(distance, digits = 4)), fill = "white")
+
+ggsave(path = "../figures/",
+       filename = "momentum_dtw.png",units = "in", 
+       width = 10, height = 7, dpi = 600)
   
-  s.m <- var.basic(s.n, s.n1, s.n2, s.n3, s.n4, weights)
-  
-  s.m_true <- get_vector(embedding_matrix, n + 1)
-  
-  sim <- cosine(s.m, s.m_true)
-  print(sim)
-  surprisals <- append(sim, surprisals)
-}
-  
 
-embedding_matrix <- eng1.embeds |> data.matrix()
-n = 6
-weights = c(1, 0.7, 0.2, 0.05, 0.05)
-
-# sentence n
-s.n <- get_vector(embedding_matrix, n)
-# sentence n-1
-s.n1 <- get_vector(embedding_matrix, n-1)
-# sentence n-2
-s.n2 <- get_vector(embedding_matrix, n-2)
-# sentence n-3
-s.n3 <- get_vector(embedding_matrix, n-3)
-# sentence n-4
-s.n4 <- get_vector(embedding_matrix, n-4)
-
-s.m <- var.basic(s.n, s.n1, s.n2, s.n3, s.n4, weights)
-
-s.m_true <- get_vector(embedding_matrix, n + 1)
-
-cosine(s.m, s.m_true)
+# 
+# 
+# 
+# ## Surprisal analysis ----
+# # Predict next-sentence vector based on ‘momentum’ from previous four sentences
+# # Cosine similarity between predicted embedding and the real embedding
+# # Correlate the "surprise" of a sentence in Story A with the surprise of the paired sentence in Story B — this captures how well the sentence-by-sentence surprise of Story A compares to Story B.
+# # Weighted sum of preceding four sentence vectors
+# # Sn + 0.7 vec(Sn-1 Sn) + 0.2 vec(Sn-2 Sn) + 0.05 vec(Sn-3 Sn) + 0.05 vec(Sn-4 Sn)
+# # Vector auto-regressive function of order N, to predict the next embedding
+# 
+# # Example:
+# get_vector <- function(matrix, row.n){
+#   return(matrix[row.n,] |> as.vector())
+# }
+# 
+# var.basic <- function(sn, sn1, sn2, sn3, sn4, weight.vector){
+#   sm <- (weight.vector[1]*sn) + 
+#     (weight.vector[2]*(sn1 - sn)) + 
+#     (weight.vector[3]*(sn2 - sn)) + 
+#     (weight.vector[4]*(sn3 - sn)) + 
+#     (weight.vector[5]*(sn4 - sn))
+#   
+#   return(sm)
+# }
+# 
+# var.basic.alt <- function(sn, sn1, sn2, sn3, sn4, weight.vector){
+#   sm <- (weight.vector[1]*sn) + 
+#     (weight.vector[2]*(sn1)) + 
+#     (weight.vector[3]*(sn2)) + 
+#     (weight.vector[4]*(sn3)) + 
+#     (weight.vector[5]*(sn4))
+#   
+#   return(sm)
+# }
+# 
+# var.auto <- function(embeddings){
+#   surprisals <- vector()
+#   momentum <- vector()
+#   embedding_matrix <- embeddings |> 
+#     data.matrix()
+#   
+#   weights = c(1, 0.7, 0.2, 0.05, 0.05)
+#   
+#   for (n in 5:(nrow(embedding_matrix) - 1)){
+#     print(n)
+#     # sentence n
+#     s.n <- get_vector(embedding_matrix, n)
+#     s.n1 <- get_vector(embedding_matrix, (n-1))
+#     s.n2 <- get_vector(embedding_matrix, (n-2))
+#     s.n3 <- get_vector(embedding_matrix, (n-3))
+#     s.n4 <- get_vector(embedding_matrix, (n-4))
+#     
+#     s.m <- var.basic(s.n, s.n1, s.n2, s.n3, s.n4, weights)
+#     
+#     s.m_true <- get_vector(embedding_matrix, n + 1)
+#     
+#     sim <- cosine(s.m, s.m_true)
+#     # print(sim)
+#     surprisals <- append(sim, surprisals)
+#     
+#     m.diff <- cosine((s.m - s.n), (s.m_true - s.n))
+#     momentum <- append(m.diff, momentum)
+#   }
+#   
+#   
+#   return(data.frame(prop.index = (1:length(surprisals))/length(surprisals),
+#              surprisals = surprisals, 
+#              momentums = momentum))
+# }
+# 
+# eng1.surprisals <- var.auto(eng1.embeds) |> 
+#   mutate(story = "eng1")
+# 
+# rus2.surprisals <- var.auto(rus2.embeds) |> 
+#   mutate(story = "rus2")
+# 
+# fre3.surprisals <- var.auto(fre3.embeds) |> 
+#   mutate(story = "fre3")
+# 
+# eng4.surprisals <- var.auto(eng4.embeds) |> 
+#   mutate(story = "eng4")
+# 
+# full.surprisals <- rbind(eng1.surprisals,
+#                          rus2.surprisals,
+#                          fre3.surprisals,
+#                          eng4.surprisals)
+# 
+# full.surprisals |> 
+#   ggplot(aes(x = prop.index, y = surprisals))+
+#   geom_line()+
+#   theme_bw()+
+#   ylab("Surprisals\ncos(predicted, actual)")+
+#   xlab("Index (proportional)")+
+#   facet_wrap(~story, scales = "free")
+# 
+# full.surprisals |> 
+#   ggplot(aes(x = prop.index, y = momentums))+
+#   geom_line()+
+#   theme_bw()+
+#   ylab("Momentum\ncos(s.m_true - s.n, s.m_pred - s.n)")+
+#   xlab("Index (proportional)")+
+#   facet_wrap(~story, scales = "free")
+# 
+# ## Manual test:
+# surprisals <- vector()
+# embedding_matrix <- eng1.embeds |> data.matrix()
+# 
+# weights = c(1, 0.7, 0.2, 0.05, 0.05)
+# 
+# for (n in 5:(nrow(embedding_matrix) - 1)){
+#   print(n)
+#   # sentence n
+#   s.n <- get_vector(embedding_matrix, n)
+#   # sentence n-1
+#   s.n1 <- get_vector(embedding_matrix, n-1)
+#   # sentence n-2
+#   s.n2 <- get_vector(embedding_matrix, n-2)
+#   # sentence n-3
+#   s.n3 <- get_vector(embedding_matrix, n-3)
+#   # sentence n-4
+#   s.n4 <- get_vector(embedding_matrix, n-4)
+#   
+#   s.m <- var.basic(s.n, s.n1, s.n2, s.n3, s.n4, weights)
+#   
+#   s.m_true <- get_vector(embedding_matrix, n + 1)
+#   
+#   sim <- cosine(s.m, s.m_true)
+#   print(sim)
+#   surprisals <- append(sim, surprisals)
+# }
+#   
+# 
+# embedding_matrix <- eng1.embeds |> data.matrix()
+# n = 6
+# weights = c(1, 0.7, 0.2, 0.05, 0.05)
+# 
+# # sentence n
+# s.n <- get_vector(embedding_matrix, n)
+# # sentence n-1
+# s.n1 <- get_vector(embedding_matrix, n-1)
+# # sentence n-2
+# s.n2 <- get_vector(embedding_matrix, n-2)
+# # sentence n-3
+# s.n3 <- get_vector(embedding_matrix, n-3)
+# # sentence n-4
+# s.n4 <- get_vector(embedding_matrix, n-4)
+# 
+# s.m <- var.basic(s.n, s.n1, s.n2, s.n3, s.n4, weights)
+# 
+# s.m_true <- get_vector(embedding_matrix, n + 1)
+# 
+# cosine(s.m, s.m_true)
