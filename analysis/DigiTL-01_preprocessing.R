@@ -377,7 +377,7 @@ granularize.sentences <- function(grain.size, sentences){
                      length(sentences))
     combined.sentences <- c(combined.sentences, 
                             paste(sentences[i:end.index], 
-                                  collapse = ""))
+                                  collapse = " "))
   }
   return(combined.sentences)
 }
@@ -390,7 +390,8 @@ for (grains in 1:20){
     unlist()
   
   eng1.grained <- data.frame(story = 1, lang = "eng",
-                         sentences = granularize.sentences(grains, eng1.clean.split),
+                         sentences = granularize.sentences(grains, 
+                                                           eng1.clean.split),
                          grain_size = grains)
   
   rus2.clean.split <- rus2.clean |> 
@@ -434,4 +435,74 @@ for (grains in 1:20){
 
 write_csv(granular.split, "../data/text_split/granular_split.csv")
 
+## Sliding window ----
+
+sliding.window <- function(window.size, sentences){
+  true.window = window.size - 1
+  combined.sentences <- character(0)
+  
+  for (ii in 1:(length(sentences)-true.window)){
+    end.index <- min(ii + true.window, 
+                     length(sentences))
+    combined.sentences <- c(combined.sentences, 
+                            paste(sentences[ii:end.index], 
+                                  collapse = " "))
+      }
+  return(combined.sentences)
+}
+
+## Test:
+# sentences = seq(1:32)
+# sliding.window(10, sentences)
+
+window.split <- data.frame()
+
+for (window in 1:20){
+  eng1.clean.split <- eng1.clean |> 
+    tokenize_sentences() |> 
+    unlist()
+  
+  eng1.window <- data.frame(story = 1, lang = "eng",
+                             sentences = sliding.window(window,
+                                                        eng1.clean.split),
+                             window = window)
+  
+  rus2.clean.split <- rus2.clean |> 
+    tokenize_sentences() |> 
+    unlist() 
+  
+  rus2.window <- data.frame(story = 2, lang = "rus",
+                             sentences = sliding.window(window, rus2.clean.split),
+                             window = window)
+  
+  
+  fre3.clean.split <- fre3.clean |> 
+    tokenize_sentences() |> 
+    unlist() 
+  
+  fre3.window <- data.frame(story = 3, lang = "fre",
+                             sentences = sliding.window(window, fre3.clean.split),
+                             window = window)
+  
+  eng4.clean.split <- eng4.clean |> 
+    tokenize_sentences() |> 
+    unlist()
+  
+  eng4.window <- data.frame(story = 4, lang = "eng",
+                             sentences = sliding.window(window, eng4.clean.split),
+                             window = window)
+  
+  
+  temp <- bind_rows(eng1.window,
+                    rus2.window,
+                    fre3.window,
+                    eng4.window) |> 
+    group_by(story, window) |> 
+    mutate(index = 1:n()) |> 
+    ungroup()
+  
+  window.split <- rbind(window.split, temp)
+}
+
+write_csv(window.split, "../data/text_split/window_split.csv")
 
