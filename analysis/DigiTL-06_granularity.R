@@ -11,80 +11,9 @@ library(dtw)
 library(reshape2)
 library(ggrepel)
 
-# load_granular <- function(grains){
-#   ## Load in the files ----
-#   all.clean.split <- read_csv("../data/text_split/granular_split.csv",
-#                               show_col_type = F)
-#   
-#   eng1.clean.split <- all.clean.split |> 
-#     filter(story == 1 & grain_size == grains)
-#   rus2.clean.split <- all.clean.split |> 
-#     filter(story == 2 & grain_size == grains)
-#   fre3.clean.split <- all.clean.split |> 
-#     filter(story == 3 & grain_size == grains)
-#   eng4.clean.split <- all.clean.split |> 
-#     filter(story == 4 & grain_size == grains)
-#   
-#   ## M-BERT in Colab ----
-#   
-#   eng1.embeds <- read_csv(paste0("../data/embeddings/mbert/s1_",
-#                                  "g",grains,
-#                                  "_embeds_raw.csv"), show_col_type = F) |> 
-#     clean_names() |> 
-#     mutate(sent_num = 1:n()) 
-#   
-#   rus2.embeds <- read_csv(paste0("../data/embeddings/mbert/s2_",
-#                                  "g",grains,
-#                                  "_embeds_raw.csv"), show_col_type = F)|> 
-#     clean_names() |> 
-#     mutate(sent_num = 1:n()) 
-#   
-#   fre3.embeds <- read_csv(paste0("../data/embeddings/mbert/s3_",
-#                                  "g",grains,
-#                                  "_embeds_raw.csv"), show_col_type = F)|> 
-#     clean_names() |> 
-#     mutate(sent_num = 1:n()) 
-#   
-#   eng4.embeds <- read_csv(paste0("../data/embeddings/mbert/s4_",
-#                                  "g",grains,
-#                                  "_embeds_raw.csv"), show_col_type = F)|> 
-#     clean_names() |> 
-#     mutate(sent_num = 1:n()) 
-#   
-#   # Join with sentences.
-#   eng1.clean.split <- eng1.clean.split |> 
-#     mutate(sent_num = 1:n()) |> 
-#     left_join(eng1.embeds, by = "sent_num")
-#   
-#   rus2.clean.split <- rus2.clean.split |> 
-#     mutate(sent_num = 1:n()) |> 
-#     left_join(rus2.embeds, by = "sent_num")
-#   
-#   fre3.clean.split <- fre3.clean.split |> 
-#     mutate(sent_num = 1:n()) |> 
-#     left_join(fre3.embeds, by = "sent_num")
-#   
-#   eng4.clean.split <- eng4.clean.split |> 
-#     mutate(sent_num = 1:n()) |> 
-#     left_join(eng4.embeds, by = "sent_num")
-#   
-#   all.clean.split_wEmb <- rbind(eng1.clean.split, 
-#                                 rus2.clean.split, 
-#                                 fre3.clean.split,
-#                                 eng4.clean.split) |>
-#     group_by(story) |>
-#     mutate(sent_num.prop = sent_num/n()) |>
-#     ungroup()
-#   
-#   return(all.clean.split_wEmb)
-# }
-# 
-# 
-# grains.5 <- load_granular(5)
-# grains.10 <- load_granular(10)
-# grains.20 <- load_granular(20)
+# Tile ---- 
 
-grain.df <- read_csv("../data/embeddings/karma.grained_umap_embeds.csv",
+grain.df <- read_csv("../data/embeddings/karma.grained_umap.csv",
                      show_col_type = F) |> 
   group_by(story, grain) |> 
   mutate(index = 1:n(),
@@ -104,18 +33,18 @@ grain.df <- read_csv("../data/embeddings/karma.grained_umap_embeds.csv",
 
 # Raw plot
 
-# grain.df |>  
-#   ggplot(aes(x=umap.x, y = umap.y, color=prop.index)) +
-#   geom_point(color = "black")+
-#   geom_path(size = 1)+
-#   facet_wrap(story~grain, ncol = 20, scales = "free")+
-#   scale_color_distiller(type = "div", palette = 4, 
-#                         name = "Sentence\nnumber")+
-#   theme_bw()+
-#   ggtitle("Raw story trajectories")
+grain.df |>
+  ggplot(aes(x=umap.x, y = umap.y, color=prop.index)) +
+  geom_point(color = "black")+
+  geom_path(size = 1)+
+  facet_grid(story~grain, scales = "free")+
+  scale_color_distiller(type = "div", palette = 4,
+                        name = "Sentence\nnumber")+
+  theme_bw()+
+  ggtitle("Raw story trajectories")
 
 
-# Smoothing ----
+## Smoothing ----
 before = 10
 after = 0
 
@@ -212,7 +141,7 @@ iterative_dtw <- function(umap.embeds, grains){
 
 dtw.df <- data.frame()
 
-for (grain in 1:20){
+for (grain in 1:15){
   dtw.df <- rbind(dtw.df,
                    iterative_dtw(grain.df, grain))
 }
@@ -263,6 +192,229 @@ ggsave(dtw.plot2,
        units = "in",
        dpi = 300,
        width = 12, height = 6)
+
+
+# Sliding window ----
+
+window.df <- read_csv("../data/embeddings/karma.window_umap.csv",
+                     show_col_type = F) |> 
+  group_by(story, window) |> 
+  mutate(index = 1:n(),
+         max = max(index),
+         prop.index = index/max) |> 
+  select(-max) |> 
+  mutate(story = if_else(story == 1 | story == 4,
+                         paste("english", story),
+                         if_else(story == 2,
+                                 paste("russian", story),
+                                 if_else(story == 3,
+                                         paste("french", story),
+                                         "other")))) |> 
+  mutate(story = factor(story,
+                        levels = c("english 1", "russian 2", "french 3","english 4"))) |> 
+  ungroup()
+
+# Raw plot
+
+window.df |>
+  mutate(label = factor(paste(window, "sentences"),
+                        levels = paste(1:n(), "sentences"))) |>  
+  ggplot(aes(x=umap.x, y = umap.y, color= story, 
+             group= story, alpha = prop.index,
+             shape = story)) +
+  geom_path(size = 0.75) +
+  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
+  scale_alpha(guide="none") +
+  theme_bw(base_size = 15)+
+  labs(caption = "Alpha as proportional sentence number")+
+  facet_wrap(~label, scales = "free")
+  
+
+
+## Smoothing ----
+before = 10
+after = 0
+
+window.smoothed <- window.df |>  
+  group_by(story, window) |> 
+  mutate(across(umap.x:umap.y, ~ slide_dbl(.x, ~mean(.x), 
+                                           .before = before, 
+                                           .after = after, 
+                                           .complete = F))) |> 
+  ungroup()
+
+umap.extremes <- window.smoothed |> 
+  filter(prop.index == 1) |> 
+  mutate(label = factor(paste(window, "sentences"),
+                        levels = paste(1:20, "sentences")))
+
+
+paths.A <- window.smoothed |> 
+  mutate(label = factor(paste(window, "sentences"),
+                        levels = paste(1:n(), "sentences"))) |>  
+  filter(window <= 6) |> 
+  ggplot(aes(x=umap.x, y = umap.y, color= story, 
+             group= story, alpha = prop.index,
+             shape = story)) +
+  geom_path(size = 0.75) +
+  geom_point(data = umap.extremes |> filter(window <= 6),
+             aes(x=umap.x, y = umap.y,
+                 color= story, 
+                 group=story, 
+                 alpha = prop.index,
+                 shape = story),
+             size = 5) +
+  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
+  scale_shape_manual(values = c(15, 16, 17, 18),
+                     name = "Story")+
+  scale_alpha(guide="none") +
+  theme_bw(base_size = 15)+
+  labs(caption = "Alpha as proportional sentence number")+
+  ggtitle("Scale of preservation", subtitle = "Adjusting number of sentences per embedding")+
+  facet_wrap(~label, scales = "free")
+
+paths.A
+
+ggsave(paths.A,
+       filename = here("../figures/karma.umap-window-smoothed.png"),
+       units = "in",
+       dpi = 450,
+       width = 12, height = 7)
+
+
+## DTW part ----
+
+iterative_dtw <- function(umap.embeds, window){
+  ## ENG1, RUS2 ----
+  eng1.rus2 <- dtw(umap.embeds |> filter(story == "english 1" & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "russian 2" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  eng1.rus2.distance <- eng1.rus2$normalizedDistance
+  
+  ## RUS2, FRE3 ----
+  
+  rus2.fre3 <- dtw(umap.embeds |> filter(story == "russian 2"  & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "french 3" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  rus2.fre3.distance <- rus2.fre3$normalizedDistance
+  
+  ## FRE3, ENG4 ----
+  fre3.eng4 <- dtw(umap.embeds |> filter(story == "french 3" & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "english 4" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  fre3.eng4.distance <- fre3.eng4$normalizedDistance
+  
+  ## ENG4, ENG1 ----
+  eng4.eng1 <- dtw(umap.embeds |> filter(story == "english 4" & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "english 1" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  eng4.eng1.distance <- eng4.eng1$normalizedDistance
+  
+  dtw.df <- data.frame(x.story = c("english 1","russian 2", "french 3","english 4"),
+                       y.story = c("russian 2", "french 3","english 4","english 1"),
+                       distance = c(eng1.rus2.distance,rus2.fre3.distance,fre3.eng4.distance, eng4.eng1.distance)) |> 
+    mutate(window = window)
+  
+  return(dtw.df)
+  
+}
+
+dtw.df <- data.frame()
+
+for (window in 1:15){
+  dtw.df <- rbind(dtw.df,
+                  iterative_dtw(window.df, window))
+}
+
+dtw.df <- dtw.df |> 
+  mutate(pair = paste(x.story, "->", y.story)) |> 
+  mutate(pair = factor(pair,
+                       levels = c("english 1 -> russian 2",
+                                  "russian 2 -> french 3",
+                                  "french 3 -> english 4",
+                                  "english 4 -> english 1")))
+
+dtw.df |> 
+  mutate(x.story = factor(x.story,
+                        levels = c("english 1","russian 2", 
+                                   "french 3","english 4")),
+       y.story = factor(y.story,
+                        levels = c("english 1","russian 2", 
+                                   "french 3","english 4"))) |>
+  ggplot(aes(x = x.story, y = y.story, fill = distance))+
+  geom_tile()+
+  facet_wrap(~window, ncol = 5)+
+  geom_label(aes(label = round(distance, digits = 3)), fill = "white")+
+  xlab("Story A")+
+  ylab("Story B")+
+  theme_bw(base_size = 14)+
+  ggtitle("DTW Distance across sliding window sizes", subtitle = "Step size of 1")
+
+ggsave(filename = here("../figures/karma.dtw-window-hm.png"),
+       units = "in",
+       dpi = 300,
+       width = 17, height = 8)
+
+
+
+dtw.plot <- ggplot(dtw.df,
+                   aes(x = window, y = distance, color = pair, 
+                       shape = pair, group = pair))+
+  geom_smooth(se = F, linetype = "dashed", method = "lm")+
+  geom_point(size = 2)+
+  scale_color_brewer(type = "qual", palette = 3, name = "Pair")+
+  scale_shape_manual(name = "Pair", values = c(15, 16, 17, 22))+
+  theme_bw(base_size = 14)+
+  xlab("Window size (sentences per sliding window)")+
+  ylab("DTW Distance")
+
+dtw.plot
+
+ggsave(dtw.plot,
+       filename = here("../figures/karma.dtw-windowsize.png"),
+       units = "in",
+       dpi = 300,
+       width = 12, height = 6)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
