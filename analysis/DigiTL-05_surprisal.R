@@ -16,10 +16,13 @@ library(dtw)
 all.clean.split <- read_csv("../data/text_split/all.clean.split_V2.csv",
                             show_col_type = F)
 
-eng1.clean.split <- all.clean.split |> filter(story == 1)
-rus2.clean.split <- all.clean.split |> filter(story == 2)
-fre3.clean.split <- all.clean.split |> filter(story == 3)
-eng4.clean.split <- all.clean.split |> filter(story == 4)
+all.chunk <- read_csv("../data/text_split/all.clean.split_VChunk.csv",
+                            show_col_type = F)
+
+eng1.clean.split <- all.chunk |> filter(story == 1)
+rus2.clean.split <- all.chunk |> filter(story == 2)
+fre3.clean.split <- all.chunk |> filter(story == 3)
+eng4.clean.split <- all.chunk |> filter(story == 4)
 
 ## M-BERT in Colab ----
 
@@ -113,8 +116,9 @@ eng4.momentum <- momentum(eng4.clean.split)
 momentum.joined <- rbind(eng1.momentum, rus2.momentum, 
                          fre3.momentum, eng4.momentum)
 
-ggplot(momentum.joined, aes(x = diff_prop, y = momentum, 
-                            color = factor(story)))+
+ggplot(momentum.joined,
+       aes(x = diff_prop, y = momentum, 
+           color = factor(story)))+
   geom_line()+
   theme_bw(base_size = 14)+
   scale_color_brewer(type = "qual", palette = 2, name = "Story")+
