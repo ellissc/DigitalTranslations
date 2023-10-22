@@ -5,6 +5,7 @@ library(janitor)
 library(lsa)
 library(tsDyn)
 library(dtw)
+library(reshape2)
 
 ## What is this script for?
 # Inputs: preprocessed / split sentences
@@ -12,7 +13,7 @@ library(dtw)
 # Function: Vector auto-regression
 
 
-## Load in the files ----
+# Load in the files ----
 all.clean.split <- read_csv("../data/text_split/all.clean.split_V2.csv",
                             show_col_type = F)
 
@@ -66,7 +67,7 @@ all.clean.split_wEmb <- rbind(eng1.clean.split,
                             eng4.clean.split)
 
 
-## Momentum ----
+# Momentum ----
 
 # Compare the change vectors between sentence embeddings
 ## Example
@@ -130,8 +131,39 @@ ggsave(path = "../figures/",
        width = 30, height = 5, dpi = 300)
 
 
+# Means ----
 
+rbind(
+  eng1.clean.split |> 
+    mutate(momentum = c(NA, eng1.momentum$momentum, NA)),
+  rus2.clean.split |> 
+    mutate(momentum = c(NA, rus2.momentum$momentum, NA)),
+  fre3.clean.split |> 
+    mutate(momentum = c(NA, fre3.momentum$momentum, NA)),
+  eng4.clean.split |> 
+    mutate(momentum = c(NA, eng4.momentum$momentum, NA))
+) |> 
+  group_by(story, chunk) |> 
+  summarize(mean.momentum = mean(momentum, na.rm = T),
+            sd = sd(momentum, na.rm = T)) |> 
+  ggplot(aes(x = chunk, y = mean.momentum, color = factor(story), shape = factor(story)))+
+  geom_point(size = 4, 
+             position = position_dodge(width = 0.2))+
+  geom_errorbar(aes(ymin = mean.momentum - sd, 
+                    ymax = mean.momentum + sd), 
+                color = "black",
+                width = 0.2, 
+                position = position_dodge(width = 0.2))+
+  theme_bw(base_size = 18)+
+  scale_color_brewer(name = "Story", type = "qual", palette = 2)+
+  scale_shape_manual(name = "Story", values = c(15, 16, 17, 18))+
+  labs(caption = "Bars represent SD")
 
+ggsave(path = "../figures/",
+       filename = "momentum-by-chunk.png",units = "in", 
+       width = 8, height = 5, dpi = 300)
+
+# DTW ----
 
 ## ENG1, RUS2 ----
 eng1.rus2 <- dtw(momentum.joined |> filter(story == 1) |> 
@@ -140,6 +172,31 @@ eng1.rus2 <- dtw(momentum.joined |> filter(story == 1) |>
                    select(momentum),
                  keep = TRUE)
 eng1.rus2.distance <- eng1.rus2$normalizedDistance
+
+## ENG1, FRE3 ----
+eng1.fre3 <- dtw(momentum.joined |> filter(story == 1) |> 
+                   select(momentum),
+                 momentum.joined |> filter(story == 3) |> 
+                   select(momentum),
+                 keep = TRUE)
+eng1.fre3.distance <- eng1.fre3$normalizedDistance
+
+## ENG1, ENG4 ----
+eng1.eng4 <- dtw(momentum.joined |> filter(story == 1) |> 
+                   select(momentum),
+                 momentum.joined |> filter(story == 4) |> 
+                   select(momentum),
+                 keep = TRUE)
+eng1.eng4.distance <- eng1.eng4$normalizedDistance
+
+## RUS2, ENG1 ----
+
+rus2.eng1 <- dtw(momentum.joined |> filter(story == 2) |> 
+                   select(momentum),
+                 momentum.joined |> filter(story == 1) |> 
+                   select(momentum),
+                 keep = TRUE)
+rus2.eng1.distance <- rus2.eng1$normalizedDistance
 
 ## RUS2, FRE3 ----
 
@@ -150,6 +207,31 @@ rus2.fre3 <- dtw(momentum.joined |> filter(story == 2) |>
                  keep = TRUE)
 rus2.fre3.distance <- rus2.fre3$normalizedDistance
 
+## RUS2, ENG4 ----
+
+rus2.eng4 <- dtw(momentum.joined |> filter(story == 2) |> 
+                   select(momentum),
+                 momentum.joined |> filter(story == 4) |> 
+                   select(momentum),
+                 keep = TRUE)
+rus2.eng4.distance <- rus2.eng4$normalizedDistance
+
+## FRE3, ENG1 ----
+fre3.eng1 <- dtw(momentum.joined |> filter(story == 3) |> 
+                   select(momentum),
+                 momentum.joined |> filter(story == 1) |> 
+                   select(momentum),
+                 keep = TRUE)
+fre3.eng1.distance <- fre3.eng1$normalizedDistance
+
+## FRE3, RUS2 ----
+fre3.rus2 <- dtw(momentum.joined |> filter(story == 3) |> 
+                   select(momentum),
+                 momentum.joined |> filter(story == 2) |> 
+                   select(momentum),
+                 keep = TRUE)
+fre3.rus2.distance <- fre3.rus2$normalizedDistance
+
 ## FRE3, ENG4 ----
 fre3.eng4 <- dtw(momentum.joined |> filter(story == 3) |> 
                    select(momentum),
@@ -157,6 +239,22 @@ fre3.eng4 <- dtw(momentum.joined |> filter(story == 3) |>
                    select(momentum),
                  keep = TRUE)
 fre3.eng4.distance <- fre3.eng4$normalizedDistance
+
+## ENG4, RUS2 ----
+eng4.rus2 <- dtw(momentum.joined |> filter(story == 4) |> 
+                   select(momentum),
+                 momentum.joined |> filter(story == 2) |> 
+                   select(momentum),
+                 keep = TRUE)
+eng4.rus2.distance <- eng4.rus2$normalizedDistance
+
+## ENG4, FRE3 ----
+eng4.fre3 <- dtw(momentum.joined |> filter(story == 4) |> 
+                   select(momentum),
+                 momentum.joined |> filter(story == 3) |> 
+                   select(momentum),
+                 keep = TRUE)
+eng4.fre3.distance <- eng4.fre3$normalizedDistance
 
 ## ENG4, ENG1 ----
 eng4.eng1 <- dtw(momentum.joined |> filter(story == 4) |> 
@@ -166,12 +264,58 @@ eng4.eng1 <- dtw(momentum.joined |> filter(story == 4) |>
                  keep = TRUE)
 eng4.eng1.distance <- eng4.eng1$normalizedDistance
 
-dtw.df <- data.frame(x.story = c("English 1","Russian 2", "French 3","English 4"),
-                     y.story = c("Russian 2", "French 3","English 4","English 1"),
-                     distance = c(eng1.rus2.distance,rus2.fre3.distance,
-                                  fre3.eng4.distance, eng4.eng1.distance))
+eng1.eng1 <- dtw(momentum.joined |> filter(story == 1) |> 
+                   select(momentum),
+                 momentum.joined |> filter(story == 1) |> 
+                   select(momentum),
+                 keep = TRUE)
+eng1.eng1.distance <- eng1.eng1$normalizedDistance
+
+rus2.rus2 <- dtw(momentum.joined |> filter(story == 2) |> 
+                   select(momentum),
+                 momentum.joined |> filter(story == 2) |> 
+                   select(momentum),
+                 keep = TRUE)
+rus2.rus2.distance <- rus2.rus2$normalizedDistance
+
+fre3.fre3 <- dtw(momentum.joined |> filter(story == 3) |> 
+                   select(momentum),
+                 momentum.joined |> filter(story == 3) |> 
+                   select(momentum),
+                 keep = TRUE)
+fre3.fre3.distance <- fre3.fre3$normalizedDistance
+
+eng4.eng4 <- dtw(momentum.joined |> filter(story == 4) |> 
+                   select(momentum),
+                 momentum.joined |> filter(story == 4) |> 
+                   select(momentum),
+                 keep = TRUE)
+eng4.eng4.distance <- eng4.eng4$normalizedDistance
+
+dtw.df <- data.frame(story = c("English 1", "Russian 2","French 3", "English 4"),
+                     `English 1` = c(eng1.eng1.distance, rus2.eng1.distance,
+                                     fre3.eng1.distance, eng4.eng1.distance),
+                     `Russian 2` = c(eng1.rus2.distance, rus2.rus2.distance,
+                                     fre3.rus2.distance, eng4.rus2.distance),
+                     `French 3` = c(eng1.fre3.distance, rus2.fre3.distance,
+                                    fre3.fre3.distance, eng4.fre3.distance),
+                     `English 4` = c(eng1.eng4.distance, rus2.eng4.distance,
+                                     fre3.eng4.distance, eng4.eng4.distance)) |> 
+  melt()
+
+
+
+
+
+
+
+
 
 dtw.df |> 
+  rename(x.story = story,
+         y.story = variable,
+         distance = value) |> 
+  mutate(y.story = gsub("\\."," ", y.story)) |> 
   mutate(x.story = factor(x.story,
                           levels = c("English 1","Russian 2", 
                                      "French 3","English 4")),
