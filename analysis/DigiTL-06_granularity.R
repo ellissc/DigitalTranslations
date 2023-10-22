@@ -37,11 +37,16 @@ grain.df |>
   ggplot(aes(x=umap.x, y = umap.y, color=prop.index)) +
   geom_point(color = "black")+
   geom_path(size = 1)+
-  facet_grid(story~grain, scales = "free")+
+  facet_wrap(~grain, scales = "free")+
   scale_color_distiller(type = "div", palette = 4,
                         name = "Sentence\nnumber")+
   theme_bw()+
   ggtitle("Raw story trajectories")
+
+ggsave(filename = here("../figures/karma.umap-grained-unsmoothed.png"),
+       units = "in",
+       dpi = 450,
+       width = 12, height = 7)
 
 
 ## Smoothing ----
@@ -228,6 +233,11 @@ window.df |>
   theme_bw(base_size = 15)+
   labs(caption = "Alpha as proportional sentence number")+
   facet_wrap(~label, scales = "free")
+
+ggsave(filename = here("../figures/karma.umap-window-unsmoothed.png"),
+       units = "in",
+       dpi = 450,
+       width = 12, height = 7)
   
 
 
@@ -387,13 +397,206 @@ ggsave(dtw.plot,
 
 
 
+## Full pairwise dtw ----
+
+full.dtw <- function(umap.embeds, window){
+  ## ENG1, RUS2 ----
+  eng1.rus2 <- dtw(umap.embeds |> filter(story == "english 1" & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "russian 2" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  eng1.rus2.distance <- eng1.rus2$normalizedDistance
+  
+  ## ENG1, FRE3 ----
+  eng1.fre3 <- dtw(umap.embeds |> filter(story == "english 1" & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "french 3" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  eng1.fre3.distance <- eng1.fre3$normalizedDistance
+  
+  ## ENG1, ENG4 ----
+  eng1.eng4 <- dtw(umap.embeds |> filter(story == "english 1" & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "english 4" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  eng1.eng4.distance <- eng1.eng4$normalizedDistance
+  
+  ## RUS2, ENG1 ----
+  
+  rus2.eng1 <- dtw(umap.embeds |> filter(story == "russian 2" & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "english 1" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  rus2.eng1.distance <- rus2.eng1$normalizedDistance
+  
+  ## RUS2, FRE3 ----
+  
+  rus2.fre3 <- dtw(umap.embeds |> filter(story == "russian 2" & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "french 3" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  rus2.fre3.distance <- rus2.fre3$normalizedDistance
+  
+  ## RUS2, ENG4 ----
+  
+  rus2.eng4 <- dtw(umap.embeds |> filter(story == "russian 2" & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "english 4" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  rus2.eng4.distance <- rus2.eng4$normalizedDistance
+  
+  ## FRE3, ENG1 ----
+  fre3.eng1 <- dtw(umap.embeds |> filter(story == "french 3" & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "english 1" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  fre3.eng1.distance <- fre3.eng1$normalizedDistance
+  
+  ## FRE3, RUS2 ----
+  fre3.rus2 <- dtw(umap.embeds |> filter(story == "french 3" & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "russian 2" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  fre3.rus2.distance <- fre3.rus2$normalizedDistance
+  
+  ## FRE3, ENG4 ----
+  fre3.eng4 <- dtw(umap.embeds |> filter(story == "french 3" & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "english 4" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  fre3.eng4.distance <- fre3.eng4$normalizedDistance
+  
+  ## ENG4, RUS2 ----
+  eng4.rus2 <- dtw(umap.embeds |> filter(story == "english 4" & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "russian 2" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  eng4.rus2.distance <- eng4.rus2$normalizedDistance
+  
+  ## ENG4, FRE3 ----
+  eng4.fre3 <- dtw(umap.embeds |> filter(story == "english 4" & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "french 3" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  eng4.fre3.distance <- eng4.fre3$normalizedDistance
+  
+  ## ENG4, ENG1 ----
+  eng4.eng1 <- dtw(umap.embeds |> filter(story == "english 4" & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "english 1" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  eng4.eng1.distance <- eng4.eng1$normalizedDistance
+  
+  eng1.eng1 <- dtw(umap.embeds |> filter(story == "english 1" & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "english 1" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  eng1.eng1.distance <- eng1.eng1$normalizedDistance
+  
+  rus2.rus2 <- dtw(umap.embeds |> filter(story == "russian 2" & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "russian 2" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  rus2.rus2.distance <- rus2.rus2$normalizedDistance
+  
+  fre3.fre3 <- dtw(umap.embeds |> filter(story == "french 3" & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "french 3" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  fre3.fre3.distance <- fre3.fre3$normalizedDistance
+  
+  eng4.eng4 <- dtw(umap.embeds |> filter(story == "english 4" & window == window) |> 
+                     select(umap.x, umap.y),
+                   umap.embeds |> filter(story == "english 4" & window == window) |> 
+                     select(umap.x, umap.y),
+                   keep = TRUE)
+  eng4.eng4.distance <- eng4.eng4$normalizedDistance
+  
+  ## Final heatmap ----
+  
+  
+  
+  dtw.df <- data.frame(story = c("eng1", "rus2","fre3", "eng4"),
+                       eng1 = c(eng1.eng1.distance, rus2.eng1.distance, fre3.eng1.distance, eng4.eng1.distance),
+                       rus2 = c(eng1.rus2.distance, rus2.rus2.distance, fre3.rus2.distance, eng4.rus2.distance),
+                       fre3 = c(eng1.fre3.distance, rus2.fre3.distance, fre3.fre3.distance, eng4.fre3.distance),
+                       eng4 = c(eng1.eng4.distance, rus2.eng4.distance, fre3.eng4.distance, eng4.eng4.distance)) |> 
+    melt() |> 
+    mutate(window = window)
+  
+  return(dtw.df)
+  
+  
+}
 
 
 
+dtw.full <- data.frame()
+
+for (window in 1:15){
+  dtw.full <- rbind(dtw.full,
+                    full.dtw(window.df, window))
+}
 
 
+dtw.full <- dtw.full |> 
+  rename(x.story = story,
+         y.story = variable) |> 
+  mutate(x.story = if_else(x.story == "eng1",
+                           "English 1",
+                           if_else(x.story == "rus2",
+                                   "Russian 2",
+                                   if_else(x.story == "fre3",
+                                           "French 3",
+                                           "English 4"))),
+         y.story = if_else(y.story == "eng1",
+                           "English 1",
+                           if_else(y.story == "rus2",
+                                   "Russian 2",
+                                   if_else(y.story == "fre3",
+                                           "French 3",
+                                           "English 4")))) |> 
+  mutate(x.story = factor(x.story,
+                          levels = c("English 1","Russian 2", 
+                                     "French 3","English 4")),
+         y.story = factor(y.story,
+                          levels = c("English 1","Russian 2", 
+                                     "French 3","English 4")))
 
 
+dtw.full |> 
+  ggplot(aes(x = x.story, y = y.story, fill = value))+
+  geom_tile()+
+  facet_wrap(~window, ncol = 5)+
+  geom_text(aes(label = round(value, digits = 5)))+
+  xlab("Story A")+
+  ylab("Story B")+
+  theme_bw(base_size = 14)+
+  scale_fill_distiller(name = "DTW Distance")+
+  ggtitle("DTW Distance across sliding window sizes", 
+          subtitle = "(Step size of 1)")+
+  scale_x_discrete(expand = c(0,0))+
+  scale_y_discrete(expand = c(0,0))
+
+ggsave(filename = here("../figures/karma.dtw-window-full.png"),
+       units = "in",
+       dpi = 300,
+       width = 18, height = 8)
 
 
 
