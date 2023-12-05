@@ -223,6 +223,28 @@ window.df <- read_csv("../data/embeddings/karma.window_umap.csv",
 # Raw plot
 
 window.df |>
+  filter(window ==1  & index <= 20) |> 
+  ggplot(aes(x=umap.x, y = umap.y, color= story, 
+             group= story, alpha = index,
+             shape = story)) +
+  geom_path(size = 0.75) +
+  geom_text_repel(aes(label = index, x = umap.x, y = umap.y), 
+                  color = "black",
+                  alpha = 0.5, min.segment.length = 0.1)+
+  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
+  scale_alpha(guide="none") +
+  theme_bw(base_size = 15)+
+  labs(caption = "Alpha as proportional sentence number")+
+  facet_wrap(~story)+
+  xlim(6,17)+
+  ylim()
+
+ggsave(filename = here("../figures/karma.first20.png"),
+       units = "in",
+       dpi = 450,
+       width = 12, height = 7)
+
+window.df |>
   mutate(label = factor(paste(window, "sentences"),
                         levels = paste(1:n(), "sentences"))) |>  
   ggplot(aes(x=umap.x, y = umap.y, color= story, 

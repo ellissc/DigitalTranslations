@@ -151,8 +151,8 @@ lag.trajectory <- function(span.x = 3, lag.x = 3, embed.df, story, lang){
 
 lag.df <- data.frame()
 
-for (span.n in 1:15){
-  for (lag.j in 1:15){
+for (span.n in 1:60){
+  for (lag.j in 1:1){
     lag.n <- lag.trajectory(span.n, lag.j, eng1.embeds, 1, "eng")
     lag.df <- lag.df |> 
       rbind(lag.n)
@@ -287,17 +287,17 @@ ggsave(path = "../figures/",
 ## By-sentence regressions? ----
 
 ggplot(lag.df |> drop_na() |> 
-         filter(sent_num <= 50 & span == 6), 
-       aes(x = lag, y = similarity))+
+         filter(sent_num <= 50 & lag == 1), 
+       aes(x = span, y = similarity))+
   # geom_line(alpha = 0.25)+
-  geom_point(alpha = 0.025)+
+  geom_point()+
   theme_bw()+
   xlab("lag")+
   ylab("Cosine similarity")+
   scale_color_brewer(name = "Story", type = "qual", palette = 2,
                      direction = -1)+
   ggtitle("Story memory", subtitle = "faceted by story")+
-  geom_smooth(method = "lm", aes(group = sent_num), se = F)+
+  geom_smooth(aes(group = sent_num), se = F)+
   facet_wrap(~story)
 
 ## Calculation ----
