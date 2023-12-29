@@ -447,17 +447,19 @@ window.df <- window.df |>
 span.window <- data.frame()
 
 for (window.x in 1:5){
-  span.x = 2
-  story.x = 1
-  lang.x = "eng"
-  
-  embeds.sub <- window.df |> 
-    filter(story == story.x & window == window.x) |> 
-    select(starts_with("x"))
-  
-  span.window <- rbind(span.window,
-                   change.helper(span.x, embeds.sub, story.x, lang.x) |> 
-                     mutate(window = window.x))
+  for (span.x in 1:5){
+    story.x = 1
+    lang.x = "eng"
+    
+    embeds.sub <- window.df |> 
+      filter(story == story.x & window == window.x) |> 
+      select(starts_with("x"))
+    
+    span.window <- rbind(span.window,
+                         change.helper(span.x, embeds.sub, 
+                                       story.x, lang.x) |> 
+                           mutate(window = window.x))
+  }
 }
 
 ggplot(span.window |> 
@@ -466,10 +468,15 @@ ggplot(span.window |>
            color = factor(window), group = window))+
   geom_line(alpha = 0.4)+
   geom_text(alpha = 0.3, aes(label = window))+
-  geom_smooth()+
+  geom_smooth(method = "lm")+
   theme_bw()+
+  facet_wrap(~span)+
   scale_color_brewer(name = "Sliding\nwindow",
-                     type = "div", palette = 2)
+                     type = "div", palette = 2)+
+  ggtitle("Memory by sliding window")+
+  xlab("Sentence number")+
+  ylab("Change vector similarity\ncos([ c - b], [ b - avg(prev.2) ])")+
+  labs(caption = "Faceted by memory span")
 
 ggsave(path = "../figures/",
        filename = "turn_angle_eng1_sliding_window.png",units = "in", 
