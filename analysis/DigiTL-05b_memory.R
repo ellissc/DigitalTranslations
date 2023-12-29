@@ -32,16 +32,20 @@ eng4.clean.split <- all.chunk |> filter(story == 4)
 
 ## Read in M-BERT embeddings ----
 
-eng1.embeds <- read_csv("../data/embeddings/mbert/s1_embeds_raw.csv", show_col_type = F) |> 
+eng1.embeds <- read_csv("../data/embeddings/mbert/s1_embeds_raw.csv", 
+                        show_col_type = F) |> 
   clean_names() 
 
-rus2.embeds <- read_csv("../data/embeddings/mbert/s2_embeds_raw.csv", show_col_type = F)|> 
+rus2.embeds <- read_csv("../data/embeddings/mbert/s2_embeds_raw.csv", 
+                        show_col_type = F)|> 
   clean_names() 
 
-fre3.embeds <- read_csv("../data/embeddings/mbert/s3_embeds_raw.csv", show_col_type = F)|> 
+fre3.embeds <- read_csv("../data/embeddings/mbert/s3_embeds_raw.csv", 
+                        show_col_type = F)|> 
   clean_names() 
 
-eng4.embeds <- read_csv("../data/embeddings/mbert/s4_embeds_raw.csv", show_col_type = F)|> 
+eng4.embeds <- read_csv("../data/embeddings/mbert/s4_embeds_raw.csv", 
+                        show_col_type = F)|> 
   clean_names() 
 
 # Join with sentences.
@@ -67,38 +71,27 @@ eng4.embeds <- read_csv("../data/embeddings/mbert/s4_embeds_raw.csv", show_col_t
 #                             eng4.clean.split)
 
 # Memory scope ----
+# Indexing test function
+index.test <- function(sentence_index, lag = 3, span = 3){
+  print(paste("Starting with sentence", sentence_index))
+  
+  # Going back 1 through 'span' sentences, that are 'lag' back
+  for (i in 1:span){
+    print(paste("Checking sentence", (sentence_index - i - lag + 1)))
+  }
+}
+
+index.test(93, 1, 3)
+
 # General idea: connection between a single sentence and a set of preceding sentences
 # Try to find the distance between sentence x, and the average of x-1, x-2, x-3, etc.
 
-# lag.sim <- function(sentence_index, lag = 3, df){
-#   ## Get sentence
-#   sentence.n = as.vector(unlist(df[sentence_index,]))
-#   
-#   ## Average preceding vectors
-#   avg.vector = rep(0, length.out = length(sentence.n))
-#   
-#   # Looping between 1 back to 'lag' back sentences
-#   for (i in 1:lag){
-#     sentence.tmp = as.vector(unlist(df[sentence_index - i,]))
-#     avg.vector = avg.vector + sentence.tmp
-#   }
-#   
-#   avg.vector = avg.vector / lag
-# 
-#   # Calculating similarity
-#   similarity <- cosine(sentence.n, avg.vector)
-#   
-#   # Euclidean distance:
-#   # similarity <- sqrt(sum((sentence.n - avg.vector)^2 ) )
-#   
-#   return(similarity)
-# }
 
 # d(S_i, lag = k, memory span = n) = || S_i, {S_(i - n - k), ..., S_(i-k)} ||
-stagger.lagger <- function(sentence_index, lag = 3, span = 3, df){
-  ## Get sentence
+# In other words, it calculates the cosine similarity between a given sentence vector and the previous n sentence vectors that are k back.
+stagger.lag <- function(sentence_index, lag = 1, span = 2, df){
   sentence.n = as.vector(unlist(df[sentence_index,]))
-  
+
   ## Average preceding vectors
   avg.vector = rep(0, length.out = length(sentence.n))
   
@@ -111,32 +104,17 @@ stagger.lagger <- function(sentence_index, lag = 3, span = 3, df){
   
   avg.vector = avg.vector / span
   
-  # Calculating similarity
   similarity <- cosine(sentence.n, avg.vector)[1,1]
-  
-  # Euclidean distance:
-  # similarity <- sqrt(sum((sentence.n - avg.vector)^2 ) )
-  
+
   return(similarity)
 }
 
-index.test <- function(sentence_index, lag = 3, span = 3){
-  print(paste("Starting with sentence", sentence_index))
-  
-  # Going back 1 through 'span' sentences, that are 'lag' back
-  for (i in 1:span){
-    print(paste("Checking sentence", (sentence_index - i - lag + 1)))
-  }
-}
-
-index.test(93, 1, 3)
-
-
-lag.trajectory <- function(span.x = 3, lag.x = 3, embed.df, story, lang){
+# Used for each story, as a wrapper function for stagger.lag
+lag.trajectory <- function(span.x = 2, lag.x = 1, embed.df, story, lang){
   temp <- c()
   
   for (i in (1 + span.x + lag.x):nrow(embed.df)){
-    temp <- append(temp, stagger.lagger(i, lag.x, span.x, embed.df))
+    temp <- append(temp, stagger.lag(i, lag.x, span.x, embed.df))
   }
   
   return(data.frame(similarity = c(rep(NA, length.out = (span.x + lag.x)),
@@ -146,12 +124,11 @@ lag.trajectory <- function(span.x = 3, lag.x = 3, embed.df, story, lang){
                   lang = lang,
                   lag = lag.x,
                   span = span.x))
-  
 }
 
 lag.df <- data.frame()
 
-for (span.n in 1:60){
+for (span.n in 1:3){
   for (lag.j in 1:1){
     lag.n <- lag.trajectory(span.n, lag.j, eng1.embeds, 1, "eng")
     lag.df <- lag.df |> 
@@ -171,7 +148,7 @@ for (span.n in 1:60){
   }
 }
 
-write_csv(lag.df, here("../data/processed_data/memory_span_analysis.csv"))
+write_csv(lag.df, here("../data/processed_data/memory_span_analysis_mini.csv"))
 
 
 # Using pregen data ----
@@ -179,8 +156,9 @@ write_csv(lag.df, here("../data/processed_data/memory_span_analysis.csv"))
 lag.df <- read_csv(here("../data/processed_data/memory_span_analysis.csv"))
 
 ggplot(lag.df |> drop_na() |> 
-         filter(lag == 1), 
-       aes(x = sent_num, y = similarity, 
+         filter(lag == 1) |> 
+         mutate(flip.sign = -similarity), 
+       aes(x = sent_num, y = flip.sign, 
            color = as.factor(story)))+
   geom_line(alpha = 0.5)+
   theme_bw()+
@@ -202,8 +180,9 @@ ggsave(path = "../figures/",
 
 
 ggplot(lag.df |> drop_na() |> 
-         filter(span <= 7 & lag <= 7), 
-       aes(x = sent_num, y = similarity, 
+         filter(span <= 7 & lag <= 7) |> 
+         mutate(flip.sign = -similarity), 
+       aes(x = sent_num, y = flip.sign, 
            color = as.factor(story)))+
   geom_line(alpha = 0.25)+
   theme_bw()+
@@ -226,8 +205,9 @@ ggsave(path = "../figures/",
 
 ## Similarity distribution ----
 
-ggplot(lag.df |> drop_na(), 
-       aes(x = similarity, 
+ggplot(lag.df |> drop_na() |> 
+         mutate(flip.sign = -similarity), 
+       aes(x = flip.sign, 
            fill = as.factor(story)))+
   geom_density(alpha = 0.75)+
   theme_bw()+
@@ -245,8 +225,9 @@ ggsave(path = "../figures/",
 ## Slope between lag v cosine similarity ----
 
 ggplot(lag.df |> drop_na() |> 
-         filter(sent_num <= 50), 
-       aes(x = lag, y = similarity, 
+         filter(sent_num <= 50) |> 
+         mutate(flip.sign = -similarity), 
+       aes(x = lag, y = flip.sign, 
            color = as.factor(story)))+
   # geom_line(alpha = 0.25)+
   geom_point(alpha = 0.025)+
@@ -265,8 +246,9 @@ ggsave(path = "../figures/",
 
 
 
-ggplot(lag.df |> drop_na(), 
-       aes(x = lag, y = similarity, 
+ggplot(lag.df |> drop_na()|> 
+         mutate(flip.sign = -similarity), 
+       aes(x = lag, y = flip.sign, 
            color = as.factor(story)))+
   # geom_line(alpha = 0.25)+
   geom_point(alpha = 0.025)+
@@ -323,9 +305,173 @@ calc.df |>
 
 
 
-## DTW part ----
+## Change vector part----
+# Instead of looking at the cosine sim between sentence vectors, we will calculate the cosine sim between the change vectors:
 
-lag.df |> 
-  drop_na() |> 
-  head()
+# Turn angle: cosine similarity between change vectors
+# Cosine similarity between vector(S.c-S.b) and vector(S.b-S.a or history)
+# In other words, it calculates the cosine similarity between a given sentence vector and the previous n sentence vectors that are k back.
+change.lag <- function(sentence_index, span = 2, df){
+  sentence.c = as.vector(unlist(df[sentence_index,]))
+  sentence.b = as.vector(unlist(df[(sentence_index - 1),]))
+  
+  ## Average preceding vectors
+  avg.vector = rep(0, length.out = length(sentence.c))
+  
+  # Going back 1 through 'span' sentences, that are 1 back
+  for (i in 1:span){
+    new.index = sentence_index - i - 1
+    sentence.tmp = as.vector(unlist(df[new.index,]))
+    avg.vector = avg.vector + sentence.tmp
+  }
+  
+  avg.vector = avg.vector / span
+  
+  cv.a = (sentence.c - sentence.b)
+  cv.b = (sentence.b - avg.vector)
+  
+  similarity <- cosine(cv.a, cv.b)[1,1]
+  
+  return(similarity)
+}
+
+change.helper <- function(span.x = 2, embed.df, story, lang){
+  temp <- c()
+  
+  for (i in (2 + span.x):nrow(embed.df)){
+    temp <- append(temp, change.lag(i, span.x, embed.df))
+  }
+  
+  return(data.frame(similarity = c(rep(NA, length.out = (1 + span.x)),
+                                   temp)) |>
+           mutate(sent_num = 1:n(),
+                  story = story,
+                  lang = lang,
+                  span = span.x))
+}
+
+span.df <- data.frame()
+
+for (span.x in 1:5){
+  span.df <- rbind(span.df,
+                   change.helper(span.x, eng1.embeds, 1, "eng"))
+  
+  span.df <- rbind(span.df,
+                   change.helper(span.x, rus2.embeds, 2, "rus"))
+  
+  span.df <- rbind(span.df,
+                   change.helper(span.x, fre3.embeds, 3, "fre"))
+  
+  span.df <- rbind(span.df,
+                   change.helper(span.x, eng4.embeds, 4, "eng"))
+}
+
+ggplot(span.df |>
+         filter(span < 4) |> 
+         drop_na(), 
+       aes(x = sent_num, y = similarity))+
+  geom_line(alpha = 0.2)+
+  # geom_point(shape = 21, fill = "lightblue")+
+  xlab("Sentence number")+
+  ylab("Change vector similarity\ncos([ c - b], [ b - avg(prev.2) ])")+
+  theme_bw(base_size = 14)+
+  geom_smooth(method = "lm", aes(color = factor(story)))+
+  facet_grid(span~story)+
+  scale_color_brewer(name = "Story", type = "qual", palette = 2)
+
+
+
+# Reminder: cosine similarity
+# cos similarity of 1 means they are identical
+# cos similarity of 0 means orthogonal, unrelated
+# cos similarity of -1 means they are opposite
+
+# Turn angle: cosine similarity between change vectors
+
+# Turn angle is generally negative
+
+ggplot(span.df |>
+         filter(story == 1) |> 
+         drop_na(), 
+       aes(x = sent_num, y = similarity, shape = factor(span),
+           color = factor(span)))+
+  geom_line(alpha = 0.2)+
+  # geom_point(alpha = 0.2)+
+  xlab("Sentence number")+
+  ylab("Change vector similarity\ncos([ c - b], [ b - avg(prev.2) ])")+
+  theme_bw(base_size = 14)+
+  geom_smooth(method = "lm")+
+  scale_color_brewer(name = "Span", palette = 2, type = "qual")+
+  ggtitle("English 1")
+
+ggsave(path = "../figures/",
+       filename = "turn_angle_eng1.png",units = "in", 
+       width = 10, height = 5.5, dpi = 300)
+
+
+## Checking the granularity
+
+read.window <- function(window_size = 1){
+  return(read_csv(paste0("../data/embeddings/mbert/window_",
+                         window_size,"_embeds_raw.csv"),
+                  show_col_types = F))
+}
+
+window.df <- data.frame()
+
+for (window in 1:5){
+  window.df <- rbind(window.df,
+                     read.window(window))
+}
+
+window.df <- window.df |> 
+  janitor::clean_names() |> 
+  group_by(story, window) |> 
+  mutate(index = 1:n(),
+         max = max(index),
+         prop.index = index/max) |> 
+  select(-max) |> 
+  mutate(story.label = if_else(story == 1 | story == 4,
+                         paste("english", story),
+                         if_else(story == 2,
+                                 paste("russian", story),
+                                 if_else(story == 3,
+                                         paste("french", story),
+                                         "other")))) |> 
+  mutate(story.label = factor(story,
+                        levels = c("english 1", "russian 2", 
+                                   "french 3","english 4"))) |> 
+  ungroup()
+
+
+span.window <- data.frame()
+
+for (window.x in 1:5){
+  span.x = 2
+  story.x = 1
+  lang.x = "eng"
+  
+  embeds.sub <- window.df |> 
+    filter(story == story.x & window == window.x) |> 
+    select(starts_with("x"))
+  
+  span.window <- rbind(span.window,
+                   change.helper(span.x, embeds.sub, story.x, lang.x) |> 
+                     mutate(window = window.x))
+}
+
+ggplot(span.window |> 
+         drop_na(),
+       aes(x = sent_num, y = similarity, 
+           color = factor(window), group = window))+
+  geom_line(alpha = 0.4)+
+  geom_text(alpha = 0.3, aes(label = window))+
+  geom_smooth()+
+  theme_bw()+
+  scale_color_brewer(name = "Sliding\nwindow",
+                     type = "div", palette = 2)
+
+ggsave(path = "../figures/",
+       filename = "turn_angle_eng1_sliding_window.png",units = "in", 
+       width = 10, height = 5.5, dpi = 300)
 
