@@ -236,8 +236,7 @@ window.df |>
   theme_bw(base_size = 15)+
   labs(caption = "Alpha as proportional sentence number")+
   facet_wrap(~story)+
-  xlim(6,17)+
-  ylim()
+  xlim(6,17)
 
 ggsave(filename = here("../figures/karma.first20.png"),
        units = "in",
@@ -355,7 +354,7 @@ iterative_dtw <- function(umap.embeds, window.x){
                        y.story = c("russian 2", "french 3","english 4","english 1"),
                        distance = c(eng1.rus2.distance,rus2.fre3.distance,
                                     fre3.eng4.distance, eng4.eng1.distance)) |> 
-    mutate(window = window)
+    mutate(window = window.x)
   
   return(dtw.df)
   
@@ -403,7 +402,7 @@ ggsave(filename = here("../figures/karma.dtw-window-hm.png"),
 dtw.plot <- ggplot(dtw.df,
                    aes(x = window, y = distance, color = pair, 
                        shape = pair, group = pair))+
-  geom_smooth(se = F, linetype = "dashed", method = "lm")+
+  geom_smooth(se = F, linetype = "dashed")+
   geom_point(size = 2)+
   scale_color_brewer(type = "qual", palette = 3, name = "Pair")+
   scale_shape_manual(name = "Pair", values = c(15, 16, 17, 22))+
