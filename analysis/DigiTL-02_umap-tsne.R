@@ -527,7 +527,12 @@ dtw.df <- data.frame(story = c("eng1", "rus2","fre3", "eng4"),
                      rus2 = c(eng1.rus2.distance, rus2.rus2.distance, fre3.rus2.distance, eng4.rus2.distance),
                      fre3 = c(eng1.fre3.distance, rus2.fre3.distance, fre3.fre3.distance, eng4.fre3.distance),
                      eng4 = c(eng1.eng4.distance, rus2.eng4.distance, fre3.eng4.distance, eng4.eng4.distance)) |> 
-  melt()
+  melt() |> 
+  mutate(x.story = as.numeric(substr(story, 4,5)),
+         y.story = as.numeric(substr(variable, 4,5)),
+         translation.steps = (x.story - y.story),
+         pair = paste(story, variable)) |> 
+  rename(dtw.distance = value)
 
 write_csv(dtw.df, file = "../data/processed_data/karma_dtw_values.csv")
 
@@ -570,47 +575,57 @@ dtw.df |>
   theme(panel.grid.minor.x = element_blank())
 
 
-## Trying VAR on the UMAP reduced data ----
-library(vars) ## Not good practice, but loading it here since it masks SELECT
 
-original.data <- umap.embeds |> 
-  filter(story == 1) |> 
-  dplyr::select(umap.x, umap.y)
+## Testing stat model for now:
 
-VARselect(original.data, type = "both")
+lmdf <- dtw.df |> 
+  filter(translation.steps >= 0)
 
-var.model <- VAR(original.data, p = 5, type = "both")
-summary(var.model)
-
-var.pred <- predict(var.model, n.ahead = 12)
-par(mai=rep(0.4, 4)); plot(var.pred)
-par(mai=rep(0.4, 4)); fanchart(var.pred)
-
-predict.x <- function(model, subset.df){
-  subset
-  
-  
-}
-
-coef.var <- coef(var.model)
-
-coef.var$umap.x
+lm1 <- lm(translation.steps ~ 1 + dtw.distance, data = lmdf)
+summary(lm1)
 
 
-preds <- predict(var.model)
-
-pred.df <- data.frame()
-
-for (i in 6:nrow(original.data)){
-  subset <- original.data[(i-5):i,]
-  print(subset)
-  # temp.pred <- predict(var.model,
-  #                      subset, n.ahead = 1)
-  # temp.df <- data.frame(pred.x = data.frame(temp.pred$fcst)$umap.x.fcst,
-  #                       pred.y = data.frame(temp.pred$fcst)$umap.y.fcst)
-  # pred.df <- rbind(pred.df,
-  #                  temp.df)
-}
+# ## Trying VAR on the UMAP reduced data ----
+# library(vars) ## Not good practice, but loading it here since it masks SELECT
+# 
+# original.data <- umap.embeds |> 
+#   filter(story == 1) |> 
+#   dplyr::select(umap.x, umap.y)
+# 
+# VARselect(original.data, type = "both")
+# 
+# var.model <- VAR(original.data, p = 5, type = "both")
+# summary(var.model)
+# 
+# var.pred <- predict(var.model, n.ahead = 12)
+# par(mai=rep(0.4, 4)); plot(var.pred)
+# par(mai=rep(0.4, 4)); fanchart(var.pred)
+# 
+# predict.x <- function(model, subset.df){
+#   subset
+#   
+#   
+# }
+# 
+# coef.var <- coef(var.model)
+# 
+# coef.var$umap.x
+# 
+# 
+# preds <- predict(var.model)
+# 
+# pred.df <- data.frame()
+# 
+# for (i in 6:nrow(original.data)){
+#   subset <- original.data[(i-5):i,]
+#   print(subset)
+#   # temp.pred <- predict(var.model,
+#   #                      subset, n.ahead = 1)
+#   # temp.df <- data.frame(pred.x = data.frame(temp.pred$fcst)$umap.x.fcst,
+#   #                       pred.y = data.frame(temp.pred$fcst)$umap.y.fcst)
+#   # pred.df <- rbind(pred.df,
+#   #                  temp.df)
+# }
 
 
 ## Chunk DTW ----
@@ -693,11 +708,11 @@ ggplot(lm.df, aes(x = translation_steps, y = dtw.distance))+
 
 ## Chunk equivalent plot ----
 
-chunk.dtw |> 
+chunk.dtw |>
   mutate(general_distance = abs(x.story - y.story) + abs(x.chunk - y.chunk),
          translation_steps = abs(x.story - y.story),
          chunk_steps = abs(x.chunk - y.chunk),
-         label = paste(x, y, sep = "-")) |> 
+         label = paste(x, y, sep = "-")) |>
   ggplot(aes(x = general_distance, y = dtw))+
   geom_smooth(method = "lm", se = F, color = "darkblue")+
   geom_point(shape = 21, fill = "lightblue", color = "black")+
@@ -705,11 +720,11 @@ chunk.dtw |>
   ylab("DTW Distance")+
   theme_bw()
 
-chunk.dtw |> 
+chunk.dtw |>
   mutate(general_distance = abs(x.story - y.story) + abs(x.chunk - y.chunk),
          translation_steps = abs(x.story - y.story),
          chunk_steps = abs(x.chunk - y.chunk),
-         label = paste(x, y, sep = "-")) |> 
+         label = paste(x, y, sep = "-")) |>
   ggplot(aes(x = chunk_steps, y = dtw))+
   geom_smooth(method = "lm", se = F, color = "darkblue")+
   geom_point(shape = 21, fill = "lightblue", color = "black")+

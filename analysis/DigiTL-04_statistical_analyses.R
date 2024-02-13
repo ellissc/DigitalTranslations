@@ -11,6 +11,40 @@ library(lmerTest)
 options(mc.cores = parallel::detectCores())
 theme_set(theme_bw() + theme(text =  element_text(size = 14)))
 
+## Starting from scratch, but leaving the previous code at the bottom.
+
+# Loading in the files ----
+
+dtw.df <- read_csv("../data/processed_data/karma_dtw_values.csv", show_col_type = F)
+
+chunk.dtw <- read_csv("../data/processed_data/karma.chunk_dtw.csv", show_col_type = F)
+
+
+## Model 1: can we predict translation steps from DTW distance? ----
+# ordered(translation_steps) ~ 1 + dtw.distance +  (1 + dtw.distance | true_lang)
+
+lmdf <- dtw.df |> 
+  filter(translation.steps >= 0)
+
+lm1 <- lm(translation.steps ~ 1 + dtw.distance, data = lmdf)
+summary(lm1)
+
+
+
+## Model 2: Do they differ more if they are farther apart in the story? ----
+# DTW(chunk i j) ~ 1 + translation_steps + chunk_difference
+lmdf2 <- chunk.dtw |> 
+  mutate(translation.steps = y.story - x.story,
+         chunk.diff = y.chunk - x.chunk) |> 
+  filter(translation.steps >= 0 & chunk.diff >= 0)
+
+lm2 <- lm(dtw ~ 1 + translation.steps + chunk.diff, data = lmdf2)
+summary(lm2)
+
+
+## Model 3: Can we predict the scope based on distance? ----
+# Sliding_window ~ 1 + dtw.distance ?
+
 
 
 ## Load in the files ----
@@ -100,7 +134,7 @@ ggplot(reconstruction_df, aes(x = pred_diff, y = true_order.prop,
 reconstruction_df$translation_steps <- as.numeric(reconstruction_df$translation_steps)
 
 
-## Chunk model ----
+## Chunk model: This is the one. ----
 # DTW(chunk i j) ~ 1 + translation_steps + chunk_difference
 # Do they differ more if they are farther apart in the translation steps vs if they are not the same plot point?
 
@@ -113,7 +147,7 @@ reconstruction_df$translation_steps <- as.numeric(reconstruction_df$translation_
 ## Lexical distance as 1-lexical similarity
 lex.dis <- data.frame(true_lang = c("eng1","rus2","fre3","eng4"),
                       pred_lang = c("eng1","rus2","fre3","eng4")) |> 
-  expand(true_lang, pred_lang) |> 
+  tidyr::expand(true_lang, pred_lang) |> 
   mutate(distance = c(0,0,0.74,0.69,
                       0,0,0.74,0.69,
                       0.74,0.74,0,0.53,
@@ -188,6 +222,15 @@ plot(bm1) # Chains don't converge well
 
 pp_check(bm1)
 
+
+## NEW MODEL!
+
+# (chunk level dtw ~ 1 + distance + translation_steps)
+# At the chunk level, 
+
+
+
+
 ## Warnings:
 #   1: There were 2127 divergent transitions after warmup. See
 # https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
@@ -224,15 +267,22 @@ basic_priors2 <- get_prior(translation_steps ~ 1 + dtw.distance + pred_diff + (1
                           family = gaussian(link = "logit"))
 # Model:
 # Change to an ordinal model?
-bm2 <- brm(formula = translation_steps ~ 1 + dtw.distance + pred_diff + (1 + dtw.distance + pred_diff | true_lang),
-           data = reconstruction_df,
-           family = gaussian(link = "logit"),
-           prior = basic_priors2, cores = 8, iter = 8000,
-           file = "stat_models/model2-translation_steps.rds")
+bm2 <- brm(formula = ordered(translation_steps) ~ 1 + dtw.distance +  (1 + dtw.distance | true_lang),
+           data = reconstruction_df.different_langs,
+           family = cumulative(), cores = 4, iter = 4000,
+           file = "stat_models/model2-translation_steps_ordinal.rds")
 
-summary(bm2)
+bm2.2 <- brm(formula = translation_steps ~ 1 + dtw.distance +  (1 + dtw.distance | true_lang),
+           data = reconstruction_df.different_langs,
+           family = gaussian(), cores = 4, iter = 4000,
+           file = "stat_models/model2-translation_steps_gaussian.rds")
 
-plot(bm2) # Chains don't converge well
+# As stories become more dissimilar, does that indicate that they are separated by more steps?
+# What are the symptoms of cultural separation / translation?
 
-pp_check(bm2)
+summary(bm2.2)
+
+plot(bm2.2) # Chains don't converge well
+
+pp_check(bm2.2)
 

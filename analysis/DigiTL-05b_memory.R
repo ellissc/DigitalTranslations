@@ -70,6 +70,10 @@ eng4.embeds <- read_csv("../data/embeddings/mbert/s4_embeds_raw.csv",
 #                             fre3.clean.split,
 #                             eng4.clean.split)
 
+
+
+
+
 # Memory scope ----
 # Indexing test function
 index.test <- function(sentence_index, lag = 3, span = 3){
@@ -305,7 +309,15 @@ calc.df |>
 
 
 
-## Change vector part----
+
+
+
+
+
+
+
+
+# Change vector part ----
 # Instead of looking at the cosine sim between sentence vectors, we will calculate the cosine sim between the change vectors:
 
 # Turn angle: cosine similarity between change vectors
@@ -352,9 +364,10 @@ change.helper <- function(span.x = 2, embed.df, story, lang){
 
 span.df <- data.frame()
 
-for (span.x in 1:5){
+for (span.x in 6:35){
+  print(span.x)
   span.df <- rbind(span.df,
-                   change.helper(span.x, eng1.embeds, 1, "eng"))
+                   change.helper(span.x, eng1.embeds[sample(1:nrow(eng1.embeds), replace=F),], 1, "eng"))
   
   span.df <- rbind(span.df,
                    change.helper(span.x, rus2.embeds, 2, "rus"))
@@ -368,7 +381,14 @@ for (span.x in 1:5){
 
 ggplot(span.df |>
          filter(span < 4) |> 
-         drop_na(), 
+         drop_na() |> 
+         mutate(story = if_else(story == 1,
+                                "1.English",
+                                if_else(story == 2,
+                                        "2.Russian",
+                                        if_else(story == 3,
+                                                "3.French",
+                                                "4.English")))), 
        aes(x = sent_num, y = similarity))+
   geom_line(alpha = 0.2)+
   # geom_point(shape = 21, fill = "lightblue")+
@@ -378,6 +398,7 @@ ggplot(span.df |>
   geom_smooth(method = "lm", aes(color = factor(story)))+
   facet_grid(span~story)+
   scale_color_brewer(name = "Story", type = "qual", palette = 2)
+
 
 
 
@@ -401,11 +422,42 @@ ggplot(span.df |>
   ylab("Change vector similarity\ncos([ c - b], [ b - avg(prev.2) ])")+
   theme_bw(base_size = 14)+
   geom_smooth(method = "lm")+
-  scale_color_brewer(name = "Span", palette = 2, type = "qual")+
+  scale_color_brewer(name = "Span", palette = 2, type = "seq")+
   ggtitle("English 1")
+
+span.df |>
+  drop_na() |> 
+  group_by(span, story) |> 
+  summarize(mean = mean(similarity, na.rm = T),
+            max = max(similarity),
+            min = min(similarity)) |> 
+  ggplot(aes(x = span, y = mean))+
+  geom_point()+
+  geom_errorbar(aes(ymin = min, ymax = max))+
+  facet_wrap(~story)+
+  theme_minimal()
+
+
 
 ggsave(path = "../figures/",
        filename = "turn_angle_eng1.png",units = "in", 
+       width = 10, height = 5.5, dpi = 300)
+
+ggplot(span.df |>
+         drop_na(), 
+       aes(x = sent_num, y = similarity, shape = factor(span),
+           color = factor(span)))+
+  # geom_line(alpha = 0.2)+
+  # geom_point(alpha = 0.2)+
+  xlab("Sentence number")+
+  ylab("Change vector similarity\ncos([ c - b], [ b - avg(prev.2) ])")+
+  theme_bw(base_size = 14)+
+  geom_smooth(method = "lm")+
+  scale_color_brewer(name = "Span", palette = 2, type = "seq")+
+  facet_wrap(~story, scales = "free")
+
+ggsave(path = "../figures/",
+       filename = "turn_angle_all.png",units = "in", 
        width = 10, height = 5.5, dpi = 300)
 
 

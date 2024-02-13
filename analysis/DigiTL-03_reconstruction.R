@@ -6,6 +6,7 @@ library(patchwork)
 library(reshape2)
 theme_set(theme_bw() + theme(text =  element_text(size = 14)))
 library(ggh4x)
+library(ggdist)
 
 ## What is this script for?
 # Input: similarity matrices for full and chunks
@@ -41,7 +42,7 @@ full_melted.df <- full_melted.df |>
 full_melted.df |> 
   ggplot(aes(x = x.num.prop, y = y.num.prop,
              fill = value))+
-  geom_hex(stat = "identity")+
+  ggplot2::geom_hex(stat = "identity")+
   facet_grid(x.story ~ y.story)+
   scale_fill_distiller(type = "seq",
                        name = "Similarity")+
@@ -303,7 +304,7 @@ test_full |>
                                    "english4 from english4"))) |> 
   ggplot(aes(x = x.num.prop, y = y.num.prop))+
   # geom_point(aes(size = as.numeric(max.sim)))+
-  geom_line()+
+  geom_point()+
   theme(legend.position = "none")+
   facet_wrap(~label)+
   xlab("Source sentence (prop.)")+
@@ -314,36 +315,66 @@ ggsave(path = "../figures/",
        filename = "karma.full-reconstruction.png",units = "in", 
        width = 12, height = 7)
 
-ggplot(chunk_scores, aes(x = x.num.prop, y = y.num.prop))+
-  geom_line()+
-  xlab("Source sentence (prop.)")+
-  ylab("Reconstruction sentence (prop.)")+
-  facet_grid2(factor(x.id, levels = grid.levels) ~ factor(y.id, levels = grid.levels),
-              strip = strip)+
-  theme_bw()
 
-ggsave(path = "../figures/",
-       filename = "karma.chunk-reconstruction.png",units = "in", 
-       width = 30, height = 30)
+test_full |> 
+  mutate(label = paste(y.story, x.story, sep = " from ")) |> 
+  mutate(label = factor(label,
+                        levels = c("english1 from english1",
+                                   "russian2 from english1",
+                                   "french3 from english1",
+                                   "english4 from english1",
+                                   "english1 from russian2",
+                                   "russian2 from russian2",
+                                   "french3 from russian2",
+                                   "english4 from russian2",
+                                   "english1 from french3",
+                                   "russian2 from french3",
+                                   "french3 from french3",
+                                   "english4 from french3",
+                                   "english1 from english4",
+                                   "russian2 from english4",
+                                   "french3 from english4",
+                                   "english4 from english4"))) |> 
+  ggplot(aes(x = label, y = num.prop.diff.abs))+
+  geom_boxplot(outlier.alpha = 0)+
+  geom_point(position = position_jitter(width = 0.2, height = 0),
+             alpha = 0.25)+
+  coord_flip()
 
 
-chunk_scores <- chunk_scores |> 
-  mutate(translation_steps = abs(x.story - y.story),
-         chunk_steps = abs(x.chunk - y.chunk),
-         different_chunks = x.chunk == y.chunk)
 
 
-reconstruction_chunk_scores <- chunk_scores |> 
-  group_by(x.id, y.id) |> 
-  summarize(rscore.pred.diff = mean(num.prop.diff),
-            rscore.pred.diff.abs = mean(num.prop.diff.abs),
-            rscore.avg.cos = mean(max.sim),
-            rscore.avg.cos.med = median(max.sim)) |> 
-  ungroup()
-
-chunk_scores <- chunk_scores |> 
-  left_join(reconstruction_chunk_scores, by = c("x.id","y.id"))
-
+# 
+# ggplot(chunk_scores, aes(x = x.num.prop, y = y.num.prop))+
+#   geom_line()+
+#   xlab("Source sentence (prop.)")+
+#   ylab("Reconstruction sentence (prop.)")+
+#   facet_grid2(factor(x.id, levels = grid.levels) ~ factor(y.id, levels = grid.levels),
+#               strip = strip)+
+#   theme_bw()
+# 
+# ggsave(path = "../figures/",
+#        filename = "karma.chunk-reconstruction.png",units = "in", 
+#        width = 30, height = 30)
+# 
+# 
+# chunk_scores <- chunk_scores |> 
+#   mutate(translation_steps = abs(x.story - y.story),
+#          chunk_steps = abs(x.chunk - y.chunk),
+#          different_chunks = x.chunk == y.chunk)
+# 
+# 
+# reconstruction_chunk_scores <- chunk_scores |> 
+#   group_by(x.id, y.id) |> 
+#   summarize(rscore.pred.diff = mean(num.prop.diff),
+#             rscore.pred.diff.abs = mean(num.prop.diff.abs),
+#             rscore.avg.cos = mean(max.sim),
+#             rscore.avg.cos.med = median(max.sim)) |> 
+#   ungroup()
+# 
+# chunk_scores <- chunk_scores |> 
+#   left_join(reconstruction_chunk_scores, by = c("x.id","y.id"))
+# 
 
 
 translation_steps <- data.frame(x.story = c("eng1","eng1","eng1","eng1",
@@ -388,7 +419,7 @@ test_full <- test_full |>
 
 
 write_csv(test_full, "../data/processed_data/karma_reconstruction_df.csv")
-write_csv(chunk_scores, "../data/processed_data/karma_chunk_reconstruction_df.csv")
+# write_csv(chunk_scores, "../data/processed_data/karma_chunk_reconstruction_df.csv")
 
 
 
