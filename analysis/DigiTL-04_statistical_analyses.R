@@ -24,26 +24,84 @@ chunk.dtw <- read_csv("../data/processed_data/karma.chunk_dtw.csv", show_col_typ
 # ordered(translation_steps) ~ 1 + dtw.distance +  (1 + dtw.distance | true_lang)
 
 lmdf <- dtw.df |> 
-  filter(translation.steps >= 0)
+  filter(translation.steps >= 0) |> 
+  mutate(story = factor(story))
+
+ggplot(lmdf, aes(x = dtw.distance, y = translation.steps))+
+  geom_point()+
+  geom_smooth(method = 'lm', se = F)
 
 lm1 <- lm(translation.steps ~ 1 + dtw.distance, data = lmdf)
 summary(lm1)
 
 
+# Complex version:
+lm2 <- lmer(translation.steps ~ 1 + dtw.distance + (1 + dtw.distance | story), 
+            data = lmdf) # failed to converge.
+summary(lm2)
+
+
+# Bayesian version:
+bm2 <- brm(formula = ordered(translation.steps) ~ 1 + dtw.distance +  (1 + dtw.distance | story),
+           data = lmdf,
+           family = cumulative(), cores = 4, iter = 4000,
+           file = "stat_models/model2-small-translation_steps_ordinal.rds")
+summary(bm2)
+
+pp_check(bm2, ndraws = 50)
+
+tidybayes::get_variables(bm2)[1:20]
+
+posterior_draws <- brms::as_draws_matrix(bm2)[,c("b_Intercept[1]",
+                                                     "b_Intercept[2]",
+                                                     "b_Intercept[3]",
+                                                     "b_dtw.distance")]
+bayesplot::mcmc_areas(posterior_draws)+
+  geom_vline(xintercept = 0, color = 'red')
+
+
 
 ## Model 2: Do they differ more if they are farther apart in the story? ----
 # DTW(chunk i j) ~ 1 + translation_steps + chunk_difference
+
 lmdf2 <- chunk.dtw |> 
   mutate(translation.steps = y.story - x.story,
          chunk.diff = y.chunk - x.chunk) |> 
   filter(translation.steps >= 0 & chunk.diff >= 0)
 
-lm2 <- lm(dtw ~ 1 + translation.steps + chunk.diff, data = lmdf2)
-summary(lm2)
+ggplot(lmdf2, aes(x = chunk.diff, y = dtw, color = factor(translation.steps)))+
+  geom_point()+
+  geom_smooth(method = 'lm', se = F)
+
+lm3 <- lm(dtw ~ 1 + translation.steps + chunk.diff, data = lmdf2)
+summary(lm3)
+
+# Bayesian version:
+bm3 <- brm(formula = dtw ~ 1 + translation.steps + chunk.diff,
+           data = lmdf2,
+           family = gaussian(), cores = 4, iter = 4000,
+           file = "stat_models/model3-chunk-dtw.rds")
+summary(bm3)
+
+pp_check(bm3, ndraws = 50) # should be a bimodal distribution?
+
+tidybayes::get_variables(bm3)[1:5]
+
+posterior_draws2 <- brms::as_draws_matrix(bm3)[,c("b_Intercept",
+                                                 "b_translation.steps",
+                                                 "b_chunk.diff")]
+bayesplot::mcmc_areas(posterior_draws2)+
+  geom_vline(xintercept = 0, color = 'red')
 
 
 ## Model 3: Can we predict the scope based on distance? ----
 # Sliding_window ~ 1 + dtw.distance ?
+
+
+
+
+
+################################################################################
 
 
 
