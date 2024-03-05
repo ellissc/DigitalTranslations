@@ -43,9 +43,9 @@ summary(lm2)
 
 # Bayesian version:
 bm2 <- brm(formula = ordered(translation.steps) ~ 1 + dtw.distance +  (1 + dtw.distance | story),
-           data = lmdf,
+           data = lmdf |> filter(x.story != y.story),
            family = cumulative(), cores = 4, iter = 4000,
-           file = "stat_models/model2-small-translation_steps_ordinal.rds")
+           file = "stat_models/model2-small-translation_steps_ordinal2.rds")
 summary(bm2)
 
 pp_check(bm2, ndraws = 50)
@@ -54,11 +54,32 @@ tidybayes::get_variables(bm2)[1:20]
 
 posterior_draws <- brms::as_draws_matrix(bm2)[,c("b_Intercept[1]",
                                                      "b_Intercept[2]",
-                                                     "b_Intercept[3]",
                                                      "b_dtw.distance")]
 bayesplot::mcmc_areas(posterior_draws)+
   geom_vline(xintercept = 0, color = 'red')
 
+
+# Predicted translation steps for the 10 observations
+# Compare the actual to the predicted translation steps
+# Try scaling DTW
+
+# Redo with chunk df but limit chunk == chunk
+
+bm1.5 <- brm(formula = ordered(translation.steps) ~ 1 + dtw.s +  (1 + dtw | y.story),
+           data = lmdf2 |> filter(x.chunk == y.chunk & x.story != y.story) |> mutate(dtw.s = dtw / max(dtw)),
+           family = cumulative(), cores = 4, iter = 4000,
+           file = "stat_models/model1-5_chunkedversion3.rds")
+summary(bm1.5)
+
+posterior_draws <- brms::as_draws_matrix(bm1.5)[,c("b_Intercept[1]",
+                                                 "b_Intercept[2]",
+                                                 "b_dtw.s")]
+bayesplot::mcmc_areas(posterior_draws)+
+  geom_vline(xintercept = 0, color = 'red')
+
+lmdf2 |> filter(x.chunk == y.chunk  & x.story != y.story) |> mutate(dtw.s = dtw / max(dtw)) |> 
+  ggplot(aes(x = dtw.s, group = translation.steps, fill = translation.steps))+
+  geom_density(alpha = 0.5)
 
 
 ## Model 2: Do they differ more if they are farther apart in the story? ----
