@@ -1,5 +1,0 @@
-"0","embeds3 %>% "
-"0","  ggplot(aes(x=tSNE1, y = tSNE2, color=factor(story), group=story)) +"
-"0","  geom_path() +"
-"0","  facet_wrap(~story) + "
-"0","  theme_minimal()"

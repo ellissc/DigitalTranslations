@@ -1,5 +1,0 @@
-"0","eng1 <- read_file(""../data/txt/English_1_1894.txt"")"
-"0","rus2 <- read_file(""../data/txt/Russian_2_1894.txt"")"
-"0","fre3 <- read_file(""../data/txt/French_3_1895.txt"")"
-"2","Error: '../data/txt/French_3_1895.txt' does not exist in current working directory ('/Users/wkw/Library/CloudStorage/Box-Box/DigitalTranslations/analysis').
-"

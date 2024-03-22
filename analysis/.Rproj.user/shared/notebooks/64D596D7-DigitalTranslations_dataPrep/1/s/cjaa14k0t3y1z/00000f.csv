@@ -1,4 +1,0 @@
-"0","eng1.clean <- read_file(""../data/text_cleaned/English_1_1894.clean.txt"")"
-"0","rus2.clean <- read_file(""../data/text_cleaned/Russian_2_1894.clean.txt"")"
-"0","fre3.clean <- read_file(""../data/text_cleaned/French_3_1895.clean.txt"")"
-"0","eng4.clean <- read_file(""../data/text_cleaned/English_4_1896.clean.txt"")"
