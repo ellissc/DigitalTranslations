@@ -10,9 +10,9 @@ theme_set(theme_bw(base_size = 14))
 # General functions ----
 
 # Generates a "language" as a 2D space of 30 points
-create_language <- function(num_points = 30){
-  story = data.frame(x = sample(1:50, num_points, replace = T),
-                     y = sample(1:50, num_points, replace = T)) |> 
+create_language <- function(num_points = 250, range.low = -50, range.high = 50){
+  story = data.frame(x = sample(range.low:range.high, num_points, replace = T),
+                     y = sample(range.low:range.high, num_points, replace = T)) |> 
     mutate(t = 1:n()) |> 
     mutate(label = if_else(t == 1, "Start",
                            if_else(t == max(t), "End", NA)))
@@ -29,7 +29,9 @@ euclid <- function(x1, y1, x2, y2) {
 #
 # Goes through the points in original.x and calculates the distances to all the
 # points in the language.other, selects the closest point, and repeats.
-match_story <- function(original.x, language.other){
+#
+# TODO: Add a probabilistic version, for the nearest neighbor
+match_story <- function(original.x, language.other, deterministic = T){
   reconstruction <- data.frame()
   
   for (ii in 1:nrow(original.x)){
@@ -67,7 +69,7 @@ iterate_translation <- function(original.text, n_iterations = 4){
   holder.df <- data.frame()
   
   for (ii in 1:n_iterations){
-    lang.x <- create_language(num_points = 50)
+    lang.x <- create_language()
     recon.x <- match_story(original.x, lang.x) |> 
       mutate(story = ii)
     
@@ -84,10 +86,38 @@ iterate_translation <- function(original.text, n_iterations = 4){
 }
 
 ## Running the iterative translations ----
-original <- create_language() |> 
-  mutate(story = 0)
 
-iterative <- iterate_translation(original, 9)
+### More coherent plot
+new_point <- function(x0, y0){
+  x1 <- x0 + rnorm(n = 1, mean = 0, sd = 5)
+  y1 <- y0 + rnorm(n = 1, mean = 0, sd = 5)
+  
+  return (c(x1, y1))
+}
+
+original <- data.frame(x = 0, y = 0)
+
+length = 50
+
+for (i in 1:length){
+  old_points <- original[i,]
+  new_points <- new_point(old_points$x, old_points$y)
+  original <- rbind(original, new_points)
+}
+
+original <- original[2:(length + 1),] |> 
+  mutate(t = 1:n(),
+         story = 0,
+         label = if_else(t == 1, "Start",
+                         if_else(t == max(t), "End", NA)))
+
+range.min <- min(c(original$x, original$y))
+range.max <- max(c(original$x, original$y))
+
+# original <- create_language() |> 
+#   mutate(story = 0)
+
+iterative <- iterate_translation(original, 4)
 
 i.plot <- iterative |> 
   mutate(story = paste("Story", story)) |> 
@@ -101,20 +131,18 @@ i.plot <- iterative |>
 
 ## Longer chain ----
 
-original <- create_language() |> 
-  mutate(story = 0)
 
-iterative <- iterate_translation(original, 49)
-
-iterative |> 
-  mutate(story = paste("Story", story)) |> 
-  mutate(story = factor(story, levels = paste("Story", 0:49))) |> 
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  scale_color_distiller(name = "Timestep")+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story))+
-  ggtitle("Stories translated iteratively")
+# iterative <- iterate_translation(original, 9)
+# 
+# iterative |> 
+#   mutate(story = paste("Story", story)) |> 
+#   mutate(story = factor(story, levels = paste("Story", 0:9))) |> 
+#   ggplot(aes(x = x, y = y, color = t.new))+
+#   geom_path(linewidth = 1)+
+#   scale_color_distiller(name = "Timestep")+
+#   geom_label(aes(label = label), color = "black")+
+#   facet_wrap(~factor(story))+
+#   ggtitle("Stories translated iteratively")
 
 
 
@@ -131,7 +159,7 @@ multi_translations <- function(original.text, n_iterations = 4){
   holder.df <- data.frame()
   
   for (ii in 1:n_iterations){
-    lang.x <- create_language(num_points = 50)
+    lang.x <- create_language()
     recon.x <- match_story(original.x, lang.x) |> 
       mutate(story = ii)
     
@@ -148,10 +176,10 @@ multi_translations <- function(original.text, n_iterations = 4){
 }
 
 ## Running the simulation ----
-original2 <- create_language() |> 
-  mutate(story = 0)
+# original2 <- create_language() |> 
+#   mutate(story = 0)
 
-multi <- multi_translations(original2, 9)
+multi <- multi_translations(original, 4)
 
 m.plot <- multi |> 
   mutate(story = paste("Story", story)) |> 
