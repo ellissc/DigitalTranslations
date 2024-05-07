@@ -1,0 +1,17 @@
+story,variable,dtw.distance,x.story,y.story,translation.steps,pair
+french1,french1,0,1,1,0,french1 french1
+russian2,french1,1.0971955370996787,2,1,1,russian2 french1
+russian3,french1,1.4499637826321206,3,1,2,russian3 french1
+french4,french1,1.4407761085329545,4,1,3,french4 french1
+french1,russian2,1.0971955370996787,1,2,-1,french1 russian2
+russian2,russian2,0,2,2,0,russian2 russian2
+russian3,russian2,1.2931385728880664,3,2,1,russian3 russian2
+french4,russian2,1.316634061176177,4,2,2,french4 russian2
+french1,russian3,1.4499637826321206,1,3,-2,french1 russian3
+russian2,russian3,1.2931385728880664,2,3,-1,russian2 russian3
+russian3,russian3,0,3,3,0,russian3 russian3
+french4,russian3,0.6602428057538229,4,3,1,french4 russian3
+french1,french4,1.4407761085329545,1,4,-3,french1 french4
+russian2,french4,1.316634061176177,2,4,-2,russian2 french4
+russian3,french4,0.6602428057538229,3,4,-1,russian3 french4
+french4,french4,0,4,4,0,french4 french4

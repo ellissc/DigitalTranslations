@@ -1,3 +1,4 @@
 
 .DS_Store
 /analysis/.Rproj.user/*
+/analysis/keras_models
