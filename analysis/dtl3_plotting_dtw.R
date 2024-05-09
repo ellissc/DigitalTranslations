@@ -266,7 +266,7 @@ umap.embeds.4 <- umap.embeds |>
 #   theme(legend.position = "none")
 # 
 # paths.1
-
+ 
 umap.extremes <- umap.embeds.4 |> 
   filter(sent_num.prop == 1) |>  
   mutate(graph_label = paste(story, lang)) 
@@ -299,33 +299,37 @@ ggsave(paths.A,
        dpi = 300,
        width = 10, height = 7)
 
-# sole.track <- umap.embeds.4 |>  
-#   filter(lang == "english" & story == 1) |> 
-#   mutate(graph_label = paste(story, lang)) |> 
-#   ggplot(aes(x=umap.x, y = umap.y, color= graph_label, 
-#              group=graph_label, alpha = sent_num.prop,
-#              shape = graph_label)) +
-#   geom_path(size = 0.75) +
-#   geom_point(data = umap.extremes |> 
-#                filter(lang == "english" & story == 1),
-#              aes(x=umap.x, y = umap.y,
-#                                        color= graph_label, 
-#                                        group=graph_label, 
-#                                        alpha = sent_num.prop,
-#                                        shape = graph_label),
-#              size = 5) +
-#   scale_color_brewer(type = "qual", palette = 3, name = "Story")+
-#   scale_shape_manual(values = c(15, 16, 17, 18),
-#                      name = "Story")+
-#   scale_alpha(guide="none") +
-#   theme_bw(base_size = 15)+
-#   labs(caption = "Alpha as proportional sentence number")
-# 
-#   ggsave(sole.track,
-#          filename = here("../figures/karma.umap-smoothed_sole.png"),
-#          units = "in",
-#          dpi = 300,
-#          width = 10, height = 7)
+sole.track <- umap.embeds.4 |>
+  filter(lang == "english" & story == 1) |>
+  mutate(graph_label = paste(story, lang)) |>
+  ggplot(aes(x=umap.x, y = umap.y, color= graph_label,
+             group=graph_label, alpha = sent_num.prop,
+             shape = graph_label)) +
+  geom_path(size = 0.75) +
+  geom_point(data = umap.extremes |> 
+               filter(graph_label == "1 english"), 
+             aes(x=umap.x, y = umap.y, fill= graph_label, 
+                                       group=graph_label, 
+                                       alpha = sent_num.prop,
+                                       shape = graph_label),
+             size = 5, color = "black") +
+  scale_fill_brewer(type = "qual", palette = 3, name = "Story")+
+  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
+  scale_shape_manual(values = c(21, 22, 23, 24), name = "Story")+
+  scale_alpha(guide="none") +
+  theme_bw(base_size = 15)+
+  labs(caption = "Alpha as proportional sentence number")+
+  ggtitle(story.meta)+
+  theme(legend.position = "none")
+  
+
+x2 <- sole.track + paths.A +
+  plot_annotation(tag_levels = "A")
+
+ggsave(x2, filename = here(paste0("../figures/",story.meta,".sole_and_joined.png")),
+       units = "in",
+       dpi = 300,
+       width = 18, height = 7)
 
 
 
@@ -363,6 +367,10 @@ umap.embeds.4 |>
   theme(legend.position = "none")+
   ggtitle(story.meta)
 
+ggsave(filename = here(paste0("../figures/",story.meta,".split_trajectories.png")),
+       units = "in",
+       dpi = 300,
+       width = 13, height = 7)
 
 # Normalized smoothing
 
@@ -718,6 +726,38 @@ ggsave(paths.A,
        dpi = 300,
        width = 10, height = 7)
 
+sole.track <- umap.embeds.4 |>
+  filter(lang == "french" & story == 1) |>
+  mutate(graph_label = paste(story, lang)) |>
+  ggplot(aes(x=umap.x, y = umap.y, color= graph_label,
+             group=graph_label, alpha = sent_num.prop,
+             shape = graph_label)) +
+  geom_path(size = 0.75) +
+  geom_point(data = umap.extremes |> 
+               filter(graph_label == "1 french"), 
+             aes(x=umap.x, y = umap.y, fill= graph_label, 
+                 group=graph_label, 
+                 alpha = sent_num.prop,
+                 shape = graph_label),
+             size = 5, color = "black") +
+  scale_fill_brewer(type = "qual", palette = 3, name = "Story")+
+  scale_color_brewer(type = "qual", palette = 3, name = "Story")+
+  scale_shape_manual(values = c(21, 22, 23, 24), name = "Story")+
+  scale_alpha(guide="none") +
+  theme_bw(base_size = 15)+
+  labs(caption = "Alpha as proportional sentence number")+
+  ggtitle(story.meta)+
+  theme(legend.position = "none")
+
+
+x2 <- sole.track + paths.A +
+  plot_annotation(tag_levels = "A")
+
+ggsave(x2, filename = here(paste0("../figures/",story.meta,".sole_and_joined.png")),
+       units = "in",
+       dpi = 300,
+       width = 18, height = 7)
+
 
 umap.embeds.4 |>  
   mutate(graph_label = paste(story, lang)) |> 
@@ -740,6 +780,11 @@ umap.embeds.4 |>
   facet_wrap(~graph_label)+
   theme(legend.position = "none")+
   ggtitle(story.meta)
+
+ggsave(filename = here(paste0("../figures/",story.meta,".split_trajectories.png")),
+       units = "in",
+       dpi = 300,
+       width = 10, height = 7)
 
 
 ## DTW ----
