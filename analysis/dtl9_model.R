@@ -38,10 +38,29 @@ match_story <- function(original.x, language.other, deterministic = T){
     x.original <- original.x[ii,]$x
     y.original <- original.x[ii,]$y
     
-    nearest <- language.other |> 
-      mutate(distance = euclid(x,y,x.original, y.original)) |> 
-      filter(distance == min(distance)) |> 
-      slice_sample(n = 1)
+    if (deterministic){
+      nearest <- language.other |> 
+        mutate(distance = euclid(x,y,x.original, y.original)) |> 
+        filter(distance == min(distance)) 
+      # print(nearest)
+      
+      nearest <- nearest |> 
+        slice_sample(n = 1)
+      # print(nearest)
+      
+    } else {
+      nearest <- language.other |> 
+        mutate(distance = euclid(x,y,x.original, y.original),
+               distance.weight = distance / sum(distance))
+      # print(nearest)
+      
+      nearest <- nearest |> 
+        slice_sample(n = 1, weight_by = distance.weight) |> 
+        select(-distance.weight)
+      # print(nearest)
+    }
+    
+    
     
     reconstruction <- rbind(reconstruction, nearest)
   }
@@ -55,7 +74,27 @@ match_story <- function(original.x, language.other, deterministic = T){
 }
 
 
-
+# df <- data.frame(index = 1:10) |> 
+#   mutate(weight.even = 1/10,
+#          weight.uneven = index / sum(index))
+# 
+# x <- c()
+# 
+# y <- c()
+# 
+# for (i in 1:5000){
+#   x.df <- df |> 
+#     slice_sample(n = 1, weight_by = weight.even)
+#   
+#   y.df <- df |> 
+#     slice_sample(n = 1, weight_by = weight.uneven)
+#   
+#   x <- append(x, x.df$index)
+#   y <- append(y, y.df$index)
+# }
+# 
+# hist(x)
+# hist(y)
 
 
 # Iterative translation ----
@@ -63,14 +102,14 @@ match_story <- function(original.x, language.other, deterministic = T){
 ## Helper functions ----
 
 # Creates a translation chain of n_iterations
-iterate_translation <- function(original.text, n_iterations = 4){
+iterate_translation <- function(original.text, n_iterations = 4, deterministic = T){
   original.x <- original.text
   
   holder.df <- data.frame()
   
   for (ii in 1:n_iterations){
     lang.x <- create_language()
-    recon.x <- match_story(original.x, lang.x) |> 
+    recon.x <- match_story(original.x, lang.x, deterministic) |> 
       mutate(story = ii)
     
     holder.df <- rbind(holder.df, recon.x)
@@ -123,7 +162,9 @@ i.plot <- iterative |>
   mutate(story = paste("Story", story)) |> 
   ggplot(aes(x = x, y = y, color = t.new))+
   geom_path(linewidth = 1)+
+  geom_point(aes(fill = t.new), color = "black", shape = 21)+
   scale_color_distiller()+
+  scale_fill_distiller()+
   geom_label(aes(label = label), color = "black")+
   facet_wrap(~factor(story), ncol = 5)+
   ggtitle("Stories translated iteratively")
@@ -153,14 +194,14 @@ i.plot <- iterative |>
 
 # Creates a set of translations that can reference the original.
 # Same as the above function, but the original.x is not updated.
-multi_translations <- function(original.text, n_iterations = 4){
+multi_translations <- function(original.text, n_iterations = 4, deterministic = T){
   original.x <- original.text
   
   holder.df <- data.frame()
   
   for (ii in 1:n_iterations){
     lang.x <- create_language()
-    recon.x <- match_story(original.x, lang.x) |> 
+    recon.x <- match_story(original.x, lang.x, deterministic) |> 
       mutate(story = ii)
     
     holder.df <- rbind(holder.df, recon.x)
@@ -185,6 +226,8 @@ m.plot <- multi |>
   mutate(story = paste("Story", story)) |> 
   ggplot(aes(x = x, y = y, color = t.new))+
   geom_path(linewidth = 1)+
+  geom_point(aes(fill = t.new), color = "black", shape = 21)+
+  scale_fill_distiller(palette = 2)+
   scale_color_distiller(palette = 2)+
   geom_label(aes(label = label), color = "black")+
   facet_wrap(~factor(story), ncol = 5)+
@@ -195,8 +238,39 @@ m.plot <- multi |>
 # Comparison ----
 
 ## Visual
-m.plot / i.plot
+deterministic <- m.plot / i.plot
 
 ## DTW 
 
 
+# Non-deterministic -----
+# Non-working at the moment.
+
+iterative.nd <- iterate_translation(original, 4, F)
+
+i.plot.nd <- iterative.nd |> 
+  mutate(story = paste("Story", story)) |> 
+  ggplot(aes(x = x, y = y, color = t.new))+
+  geom_path(linewidth = 1)+
+  geom_point(aes(fill = t.new), color = "black", shape = 21)+
+  scale_color_distiller()+
+  scale_fill_distiller()+
+  geom_label(aes(label = label), color = "black")+
+  facet_wrap(~factor(story), ncol = 5)+
+  ggtitle("Stories translated iteratively")
+
+
+multi.nd <- multi_translations(original, 4, F)
+
+m.plot.nd <- multi.nd |> 
+  mutate(story = paste("Story", story)) |> 
+  ggplot(aes(x = x, y = y, color = t.new))+
+  geom_path(linewidth = 1)+
+  geom_point(aes(fill = t.new), color = "black", shape = 21)+
+  scale_fill_distiller(palette = 2)+
+  scale_color_distiller(palette = 2)+
+  geom_label(aes(label = label), color = "black")+
+  facet_wrap(~factor(story), ncol = 5)+
+  ggtitle("Stories translated with reference to original")
+
+nondeterministic <- m.plot.nd / i.plot.nd
