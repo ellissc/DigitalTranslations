@@ -8,9 +8,13 @@ library(patchwork)
 theme_set(theme_bw(base_size = 14))
 
 # General functions ----
+scale.distance = function(x) { (x - min(x)) / (max(x) - min(x)) }
+
 
 # Generates a "language" as a 2D space of 30 points
-create_language <- function(num_points = 250, range.low = -50, range.high = 50){
+create_language <- function(num_points = 250, 
+                            range.low = -50, 
+                            range.high = 50){
   story = data.frame(x = sample(range.low:range.high, num_points, replace = T),
                      y = sample(range.low:range.high, num_points, replace = T)) |> 
     mutate(t = 1:n()) |> 
@@ -21,8 +25,13 @@ create_language <- function(num_points = 250, range.low = -50, range.high = 50){
 }
 
 # Euclidean distance function
-euclid <- function(x1, y1, x2, y2) {
-  sqrt((x2 - x1)^2 + (y2 - y1)^2)
+euclid <- function(x1, y1, x2, y2, scaled = T, reverse = T) {
+  if (scaled) { 
+    distance = scale.distance(sqrt((x2 - x1)^2 + (y2 - y1)^2))
+    }
+  else {
+    distance = sqrt((x2 - x1)^2 + (y2 - y1)^2)
+    }
 }
 
 # Recreates the story of original.x using language.other
@@ -31,7 +40,8 @@ euclid <- function(x1, y1, x2, y2) {
 # points in the language.other, selects the closest point, and repeats.
 #
 # TODO: Add a probabilistic version, for the nearest neighbor
-match_story <- function(original.x, language.other, deterministic = T, determinism = 1){
+match_story <- function(original.x, language.other, 
+                        deterministic = T, fidelity = 1){
   reconstruction <- data.frame()
   
   for (ii in 1:nrow(original.x)){
@@ -54,13 +64,11 @@ match_story <- function(original.x, language.other, deterministic = T, determini
       # print(nearest)
       
       nearest <- nearest |> 
-        slice_sample(n = 1, weight_by = exp(distance*determinism)) 
+        slice_sample(n = 1, weight_by = exp(distance*fidelity)) 
         # e^(distance * x), as x goes to zero, everything has equal weight
         # as it increases, it becomes more extreme
       # print(nearest)
     }
-    
-    
     
     reconstruction <- rbind(reconstruction, nearest)
   }
@@ -73,43 +81,39 @@ match_story <- function(original.x, language.other, deterministic = T, determini
   return(reconstruction)
 }
 
-
-# df <- data.frame(index = 1:10) |> 
-#   mutate(weight.even = 1/10,
-#          weight.uneven = index / sum(index))
-# 
-# x <- c()
-# 
-# y <- c()
-# 
-# for (i in 1:5000){
-#   x.df <- df |> 
-#     slice_sample(n = 1, weight_by = weight.even)
-#   
-#   y.df <- df |> 
-#     slice_sample(n = 1, weight_by = weight.uneven)
-#   
-#   x <- append(x, x.df$index)
-#   y <- append(y, y.df$index)
-# }
-# 
-# hist(x)
-# hist(y)
-
+# Test plot ----
+# iterative.nd <- iterate_translation(original, 4, F, 1)
+data.frame(x = seq(0,1,by = 0.1)) |> 
+  mutate(exp0 = exp(x*0),
+         exp25 = exp(x*0.25),
+         exp50 = exp(x*0.5),
+         exp75 = exp(x*0.75),
+         exp100 = exp(x*1),
+         exp125 = exp(x*1.25),
+         exp150 = exp(x*1.5),
+         exp175 = exp(x*1.75)) |> 
+  mutate(x.reverse = 1 - x) |> 
+  pivot_longer(cols = starts_with("exp"),
+               values_to = "weighting",
+               names_to = "exp.type") |> 
+  mutate(fidelity = as.numeric(gsub("exp","",exp.type))/100) |> 
+  ggplot(aes(x = x, y = weighting, color = fidelity, group = fidelity))+
+  geom_line()
 
 # Iterative translation ----
 
 ## Helper functions ----
 
 # Creates a translation chain of n_iterations
-iterate_translation <- function(original.text, n_iterations = 4, deterministic = T, determinism = 1){
+iterate_translation <- function(original.text, n_iterations = 4, 
+                                deterministic = T, fidelity = 1){
   original.x <- original.text
   
   holder.df <- data.frame()
   
   for (ii in 1:n_iterations){
     lang.x <- create_language()
-    recon.x <- match_story(original.x, lang.x, deterministic, determinism) |> 
+    recon.x <- match_story(original.x, lang.x, deterministic, fidelity) |> 
       mutate(story = ii)
     
     holder.df <- rbind(holder.df, recon.x)
@@ -194,14 +198,16 @@ i.plot <- iterative |>
 
 # Creates a set of translations that can reference the original.
 # Same as the above function, but the original.x is not updated.
-multi_translations <- function(original.text, n_iterations = 4, deterministic = T, determinism = 1){
+multi_translations <- function(original.text, n_iterations = 4, 
+                               deterministic = T, fidelity = 1){
   original.x <- original.text
   
   holder.df <- data.frame()
   
   for (ii in 1:n_iterations){
     lang.x <- create_language()
-    recon.x <- match_story(original.x, lang.x, deterministic, determinism) |> 
+    recon.x <- match_story(original.x, lang.x, 
+                           deterministic, fidelity) |> 
       mutate(story = ii)
     
     holder.df <- rbind(holder.df, recon.x)
@@ -246,7 +252,9 @@ deterministic <- m.plot / i.plot
 # Non-deterministic -----
 # Non-working at the moment.
 
-iterative.nd <- iterate_translation(original, 4, F, 2)
+fidelity.val <- 0.05
+
+iterative.nd <- iterate_translation(original, 4, F, fidelity.val)
 
 i.plot.nd <- iterative.nd |> 
   mutate(story = paste("Story", story)) |> 
@@ -260,7 +268,7 @@ i.plot.nd <- iterative.nd |>
   ggtitle("Stories translated iteratively")
 
 
-multi.nd <- multi_translations(original, 4, F, 2)
+multi.nd <- multi_translations(original, 4, F, fidelity.val)
 
 m.plot.nd <- multi.nd |> 
   mutate(story = paste("Story", story)) |> 
