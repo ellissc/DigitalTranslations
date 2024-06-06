@@ -807,7 +807,8 @@ full.dtw |>
   scale_shape_manual(values = c(15, 17), name = "Translation\ntype")+
   xlab("Translation order")+
   ylab("Normalized DTW distance")+
-  facet_wrap(~language)
+  facet_wrap(~language)+
+  ggtitle("Deterministic translation")
 
 ggsave(filename = paste0("model.dtw-deterministic.png"),
        path = "../figures/model_figures",
@@ -827,7 +828,8 @@ full.dtw |>
   scale_color_brewer(name = "Fidelity", palette = 3, type = "qual")+
   facet_grid(translation~language)+
   xlab("Translation order")+
-  ylab("Normalized DTW distance")
+  ylab("Normalized DTW distance")+
+  ggtitle("Non-deterministic translation")
 
 ggsave(filename = paste0("model.dtw-non-deterministic.png"),
        path = "../figures/model_figures",
