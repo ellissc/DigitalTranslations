@@ -124,16 +124,21 @@ match_story <- function(original.x, language.other,
 
 ### Chain translations ----
 # Creates a translation chain of n_iterations
-iterate_translation <- function(original.text, n_iterations = 4, range.low = -50, range.high = 50,
+iterate_translation <- function(original.text, n_iterations = 4, 
+                                range.low = -50, range.high = 50,
                                 deterministic = T, fidelity = 1, same_language = T){
   original.x <- original.text
   
-  if (same_language) {lang.x <- create_language(range.low = range.low, range.high = range.high)} # If it's the same language, create the language outside of the for-loop
+  # If it's the same language, create the language outside of the for-loop
+  if (same_language) {lang.x <- create_language(range.low = range.low, 
+                                                range.high = range.high)} 
   
   holder.df <- data.frame()
   
   for (ii in 1:n_iterations){
-    if (!same_language) {lang.x <- create_language(range.low = range.low, range.high = range.high)} # If they are different languages, create a new language each iteration
+    # If they are "different languages", create a new language each iteration
+    if (!same_language) {lang.x <- create_language(range.low = range.low, 
+                                                   range.high = range.high)} 
     recon.x <- match_story(original.x, lang.x, 
                            deterministic, fidelity) |> 
       mutate(story = ii)
@@ -153,16 +158,19 @@ iterate_translation <- function(original.text, n_iterations = 4, range.low = -50
 ### Multi-translations ----
 # Creates a set of translations that can reference the original.
 # Same as the above function, but the original.x is not updated.
-multi_translations <- function(original.text, n_iterations = 4, range.low = -50, range.high = 50,
+multi_translations <- function(original.text, n_iterations = 4, 
+                               range.low = -50, range.high = 50,
                                deterministic = T, fidelity = 1, same_language = T){
   original.x <- original.text
   
-  if (same_language) {lang.x <- create_language(range.low = range.low, range.high = range.high)}
+  if (same_language) {lang.x <- create_language(range.low = range.low, 
+                                                range.high = range.high)}
   
   holder.df <- data.frame()
   
   for (ii in 1:n_iterations){
-    if (!same_language) {lang.x <- create_language(range.low = range.low, range.high = range.high)}
+    if (!same_language) {lang.x <- create_language(range.low = range.low, 
+                                                   range.high = range.high)}
     recon.x <- match_story(original.x, lang.x, 
                            deterministic, fidelity) |> 
       mutate(story = ii)
@@ -181,13 +189,13 @@ multi_translations <- function(original.text, n_iterations = 4, range.low = -50,
 
 ## DTW function ----
 dtw.custom <- function(language = "same", translation = "iterative", 
-                       style = "deterministic", num_translations = 29,
+                       style = "deterministic", num_translations = 30,
                        fidelity.val, translation.df){
   dtw.holder <- data.frame()
   original_n <- translation.df |> 
-    filter(story == 0)
+    filter(story == 1)
   
-  for (iter in 1:num_translations){
+  for (iter in 2:num_translations){
     subset_n <- translation.df |> 
       filter(story == iter)
     
@@ -198,7 +206,8 @@ dtw.custom <- function(language = "same", translation = "iterative",
     
     dtw.holder <- dtw.holder |> 
       rbind(data.frame(language, translation, iter, style, fidelity = fidelity.val,
-                       dtw.distance = dtw.res$normalizedDistance))
+                       dtw.normalizedDistance = dtw.res$normalizedDistance,
+                       dtw.distance = dtw.res$distance))
   }
   return(dtw.holder)
 }
@@ -237,13 +246,13 @@ original <- original[2:(length + 1),] |>
 range.min <- min(c(original$x, original$y))
 range.max <- max(c(original$x, original$y))
 
-ggplot(original, aes(x = x, y = y, color = t))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t), color = "black", shape = 21)+
-  scale_color_distiller()+
-  scale_fill_distiller()+
-  geom_label(aes(label = label), color = "black")+
-  ggtitle("Original story")
+# ggplot(original, aes(x = x, y = y, color = t))+
+#   geom_path(linewidth = 1)+
+#   geom_point(aes(fill = t), color = "black", shape = 21)+
+#   scale_color_distiller(name = "Sentence n")+
+#   scale_fill_distiller(name = "Sentence n")+
+#   # geom_label(aes(label = label), color = "black")+
+#   ggtitle("Original story")
 
 # original <- create_language() |> 
 #   mutate(story = 0)
@@ -258,21 +267,22 @@ full.dtw <- data.frame()
 
 # Same language, deterministic ----
 ## Iterative ----
-n_translations <- 29
+n_translations <- 30
 
 iterative <- iterate_translation(original, n_translations, range.min, range.max, deterministic = T, fidelity = 1, same_language = T)
 
-i.plot <- iterative |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |>  
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_color_distiller()+
-  scale_fill_distiller()+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story),ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Iterative translations")
+# i.plot <- iterative |> 
+#   filter(story != 0) |> 
+#   mutate(story = factor(paste("Story", story),
+#                         levels = paste("Story", min(story):n_translations))) |>  
+#   ggplot(aes(x = x, y = y, color = t.new))+
+#   geom_path(linewidth = 1)+
+#   geom_point(aes(fill = t.new), color = "black", shape = 21)+
+#   scale_color_distiller(name = "Sentence n")+
+#   scale_fill_distiller(name = "Sentence n")+
+#   # geom_label(aes(label = label), color = "black")+
+#   facet_wrap(~factor(story),ncol = ceiling((n_translations+1)/2))+
+#   ggtitle("Iterative translations")
 
 # i.plot
 
@@ -280,527 +290,104 @@ i.plot <- iterative |>
 
 multi <- multi_translations(original, n_translations, range.min, range.max, deterministic = T, fidelity = 1, same_language = T)
 
-m.plot <- multi |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |> 
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_fill_distiller(palette = 2)+
-  scale_color_distiller(palette = 2)+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story), ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Scattershot translations")
+# m.plot <- multi |> 
+#   filter(story != 0) |> 
+#   mutate(story = factor(paste("Story", story),
+#                         levels = paste("Story", min(story):n_translations))) |> 
+#   ggplot(aes(x = x, y = y, color = t.new))+
+#   geom_path(linewidth = 1)+
+#   geom_point(aes(fill = t.new), color = "black", shape = 21)+
+#   scale_fill_distiller(palette = 2)+
+#   scale_color_distiller(palette = 2)+
+#   # geom_label(aes(label = label), color = "black")+
+#   facet_wrap(~factor(story), ncol = ceiling((n_translations+1)/2))+
+#   ggtitle("Scattershot translations")
 
 # m.plot
 
 full.dtw <- full.dtw |> 
-  rbind(dtw.custom("same","iterative","deterministic", n_translations, NA, iterative),
-        dtw.custom("same","scattershot","deterministic", n_translations, NA, multi))
+  rbind(dtw.custom("same","iterative","deterministic",
+                   n_translations, NA, iterative),
+        dtw.custom("same","scattershot","deterministic",
+                   n_translations, NA, multi))
 
-i.plot / m.plot+
-  plot_annotation(title = "Same language, deterministic", tag_levels = "A")
-
-ggsave(filename = "model.deterministic-same.png",
-       path = "../figures/model_figures",
-       units = "in",
-       dpi = 300,
-       width = 26,
-       height = 12)
+# i.plot / m.plot+
+#   plot_annotation(title = "Same language, deterministic", tag_levels = "A")
+# 
+# ggsave(filename = "model.deterministic-same.png",
+#        path = "figures/model_figures",
+#        units = "in",
+#        dpi = 300,
+#        width = 26,
+#        height = 12)
 
 
 # Different language, deterministic ----
 ## Iterative ----
 iterative <- iterate_translation(original, n_translations, range.min, range.max, deterministic = T, fidelity = 1, same_language = F)
 
-i.plot <- iterative |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |>  
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_color_distiller()+
-  scale_fill_distiller()+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story),ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Iterative translations")
-
-# i.plot
-
 ## Scattershot ----
 
 multi <- multi_translations(original, n_translations, range.min, range.max, deterministic = T, fidelity = 1, same_language = F)
 
-m.plot <- multi |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |> 
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_fill_distiller(palette = 2)+
-  scale_color_distiller(palette = 2)+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story), ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Scattershot translations")
-
-# m.plot
-
 full.dtw <- full.dtw |> 
-  rbind(dtw.custom("different","iterative","deterministic", n_translations, NA, iterative),
-        dtw.custom("different","scattershot","deterministic", n_translations, NA, multi))
+  rbind(dtw.custom("different","iterative","deterministic",
+                   n_translations, NA, iterative),
+        dtw.custom("different","scattershot","deterministic",
+                   n_translations, NA, multi))
+
+
+# Varying fidelity ----
+
+for (fidelity.val in seq(10, 90, by = 10)){
+  ## Same language, non-deterministic ----
+  ### Iterative ----
+  iterative <- iterate_translation(original, n_translations, 
+                                   range.min, range.max, 
+                                   deterministic = F, fidelity = fidelity.val,
+                                   same_language = T)
+  
+  ### Scattershot ----
+  
+  multi <- multi_translations(original, n_translations, 
+                              range.min, range.max, deterministic = F, 
+                              fidelity = fidelity.val, same_language = T)
+  
+  full.dtw <- full.dtw |> 
+    rbind(dtw.custom("same","iterative","non-deterministic", n_translations, 
+                     fidelity.val, iterative),
+          dtw.custom("same","scattershot","non-deterministic", n_translations, 
+                     fidelity.val, multi))
+  
+  ## Different language, non-deterministic ----
+  ### Iterative ----
+  iterative <- iterate_translation(original, n_translations,
+                                   range.min, range.max, deterministic = F, 
+                                   fidelity = fidelity.val, same_language = F)
+  
+  ### Scattershot ----
+  multi <- multi_translations(original, n_translations, 
+                              range.min, range.max, deterministic = F, 
+                              fidelity = fidelity.val, same_language = F)
+  
+  
+  full.dtw <- full.dtw |> 
+    rbind(dtw.custom("different","iterative","non-deterministic",
+                     n_translations, fidelity.val, iterative),
+          dtw.custom("different","scattershot","non-deterministic", 
+                     n_translations, fidelity.val, multi))
+}
 
-i.plot / m.plot+
-  plot_annotation(title = "Different languages, deterministic", tag_levels = "A")
 
-ggsave(filename = "model.deterministic-different.png",
-       path = "../figures/model_figures",
-       units = "in",
-       dpi = 300,
-       width = 26,
-       height = 12)
 
-# Same language, non-deterministic, fidelity of 10 ----
-fidelity.val <- 10
-
-## Iterative ----
-iterative <- iterate_translation(original, n_translations, range.min, range.max, deterministic = F, fidelity = fidelity.val, same_language = T)
-
-i.plot <- iterative |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |>  
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_color_distiller()+
-  scale_fill_distiller()+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story),ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Iterative translations")
-
-# i.plot
-
-## Scattershot ----
-
-multi <- multi_translations(original, n_translations, range.min, range.max, deterministic = F, fidelity = fidelity.val, same_language = T)
-
-m.plot <- multi |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |> 
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_fill_distiller(palette = 2)+
-  scale_color_distiller(palette = 2)+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story), ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Scattershot translations")
-
-# m.plot
-
-full.dtw <- full.dtw |> 
-  rbind(dtw.custom("same","iterative","non-deterministic", n_translations, 
-                   fidelity.val, iterative),
-        dtw.custom("same","scattershot","non-deterministic", n_translations, 
-                   fidelity.val, multi))
-
-i.plot / m.plot+
-  plot_annotation(title = "Same language, non-deterministic", 
-                  subtitle = paste("Fidelity of", fidelity.val), tag_levels = "A")
-
-ggsave(filename = paste0("model.nondeterministic-same-f",fidelity.val,".png"),
-       path = "../figures/model_figures",
-       units = "in",
-       dpi = 300,
-       width = 26,
-       height = 12)
-
-# Different language, non-deterministic ----
-## Iterative ----
-iterative <- iterate_translation(original, n_translations, range.min, range.max, deterministic = F, fidelity = fidelity.val, same_language = F)
-
-i.plot <- iterative |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |>  
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_color_distiller()+
-  scale_fill_distiller()+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story),ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Iterative translations")
-
-# i.plot
-
-## Scattershot ----
-multi <- multi_translations(original, n_translations, range.min, range.max, deterministic = F, fidelity = fidelity.val, same_language = F)
-
-m.plot <- multi |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |> 
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_fill_distiller(palette = 2)+
-  scale_color_distiller(palette = 2)+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story), ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Scattershot translations")
-
-# m.plot
-
-full.dtw <- full.dtw |> 
-  rbind(dtw.custom("different","iterative","non-deterministic", n_translations, 
-                   fidelity.val, iterative),
-        dtw.custom("different","scattershot","non-deterministic", n_translations, 
-                   fidelity.val, multi))
-
-i.plot / m.plot+
-  plot_annotation(title = "Different languages, non-deterministic", 
-                  subtitle = paste("Fidelity of", fidelity.val), tag_levels = "A")
-
-ggsave(filename = paste0("model.nondeterministic-different-f",fidelity.val,".png"),
-       path = "../figures/model_figures",
-       units = "in",
-       dpi = 300,
-       width = 26,
-       height = 12)
-
-
-
-# Same language, non-deterministic, fidelity of 20 ----
-fidelity.val <- 20
-
-## Iterative ----
-iterative <- iterate_translation(original, n_translations, range.min, range.max, deterministic = F, fidelity = fidelity.val, same_language = T)
-
-i.plot <- iterative |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |>  
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_color_distiller()+
-  scale_fill_distiller()+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story),ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Iterative translations")
-
-# i.plot
-
-## Scattershot ----
-
-multi <- multi_translations(original, n_translations, range.min, range.max, deterministic = F, fidelity = fidelity.val, same_language = T)
-
-m.plot <- multi |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |> 
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_fill_distiller(palette = 2)+
-  scale_color_distiller(palette = 2)+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story), ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Scattershot translations")
-
-# m.plot
-
-full.dtw <- full.dtw |> 
-  rbind(dtw.custom("same","iterative","non-deterministic", n_translations, 
-                   fidelity.val, iterative),
-        dtw.custom("same","scattershot","non-deterministic", n_translations, 
-                   fidelity.val, multi))
-
-i.plot / m.plot+
-  plot_annotation(title = "Same language, non-deterministic", 
-                  subtitle = paste("Fidelity of", fidelity.val), tag_levels = "A")
-
-ggsave(filename = paste0("model.nondeterministic-same-f",fidelity.val,".png"),
-       path = "../figures/model_figures",
-       units = "in",
-       dpi = 300,
-       width = 26,
-       height = 12)
-
-
-# Different language, non-deterministic ----
-## Iterative ----
-iterative <- iterate_translation(original, n_translations, range.min, range.max, deterministic = F, fidelity = fidelity.val, same_language = F)
-
-i.plot <- iterative |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |>  
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_color_distiller()+
-  scale_fill_distiller()+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story),ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Iterative translations")
-
-# i.plot
-
-## Scattershot ----
-multi <- multi_translations(original, n_translations, range.min, range.max, deterministic = F, fidelity = fidelity.val, same_language = F)
-
-m.plot <- multi |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |> 
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_fill_distiller(palette = 2)+
-  scale_color_distiller(palette = 2)+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story), ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Scattershot translations")
-
-# m.plot
-
-full.dtw <- full.dtw |> 
-  rbind(dtw.custom("different","iterative","non-deterministic", n_translations, 
-                   fidelity.val, iterative),
-        dtw.custom("different","scattershot","non-deterministic", n_translations, 
-                   fidelity.val, multi))
-
-i.plot / m.plot+
-  plot_annotation(title = "Different languages, non-deterministic", 
-                  subtitle = paste("Fidelity of", fidelity.val), tag_levels = "A")
-
-ggsave(filename = paste0("model.nondeterministic-different-f",fidelity.val,".png"),
-       path = "../figures/model_figures",
-       units = "in",
-       dpi = 300,
-       width = 26,
-       height = 12)
-
-# Same language, non-deterministic, fidelity of 60 ----
-fidelity.val <- 60
-
-## Iterative ----
-iterative <- iterate_translation(original, n_translations, range.min, range.max, deterministic = F, fidelity = fidelity.val, same_language = T)
-
-i.plot <- iterative |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |>  
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_color_distiller()+
-  scale_fill_distiller()+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story),ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Iterative translations")
-
-# i.plot
-
-## Scattershot ----
-
-multi <- multi_translations(original, n_translations, range.min, range.max, deterministic = F, fidelity = fidelity.val, same_language = T)
-
-m.plot <- multi |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |> 
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_fill_distiller(palette = 2)+
-  scale_color_distiller(palette = 2)+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story), ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Scattershot translations")
-
-# m.plot
-
-full.dtw <- full.dtw |> 
-  rbind(dtw.custom("same","iterative","non-deterministic", n_translations, 
-                   fidelity.val, iterative),
-        dtw.custom("same","scattershot","non-deterministic", n_translations, 
-                   fidelity.val, multi))
-
-i.plot / m.plot+
-  plot_annotation(title = "Same language, non-deterministic", 
-                  subtitle = paste("Fidelity of", fidelity.val), tag_levels = "A")
-
-ggsave(filename = paste0("model.nondeterministic-same-f",fidelity.val,".png"),
-       path = "../figures/model_figures",
-       units = "in",
-       dpi = 300,
-       width = 26,
-       height = 12)
-
-
-
-# Different language, non-deterministic ----
-## Iterative ----
-iterative <- iterate_translation(original, n_translations, range.min, range.max, deterministic = F, fidelity = fidelity.val, same_language = F)
-
-i.plot <- iterative |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |>  
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_color_distiller()+
-  scale_fill_distiller()+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story),ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Iterative translations")
-
-# i.plot
-
-## Scattershot ----
-multi <- multi_translations(original, n_translations, range.min, range.max, deterministic = F, fidelity = fidelity.val, same_language = F)
-
-m.plot <- multi |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |> 
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_fill_distiller(palette = 2)+
-  scale_color_distiller(palette = 2)+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story), ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Scattershot translations")
-
-# m.plot
-
-full.dtw <- full.dtw |> 
-  rbind(dtw.custom("different","iterative","non-deterministic", n_translations, 
-                   fidelity.val, iterative),
-        dtw.custom("different","scattershot","non-deterministic", n_translations, 
-                   fidelity.val, multi))
-
-i.plot / m.plot+
-  plot_annotation(title = "Different languages, non-deterministic", 
-                  subtitle = paste("Fidelity of", fidelity.val), tag_levels = "A")
-
-ggsave(filename = paste0("model.nondeterministic-different-f",fidelity.val,".png"),
-       path = "../figures/model_figures",
-       units = "in",
-       dpi = 300,
-       width = 26,
-       height = 12)
-
-# Same language, non-deterministic, fidelity of 90 ----
-fidelity.val <- 90
-
-## Iterative ----
-iterative <- iterate_translation(original, n_translations, range.min, range.max, deterministic = F, fidelity = fidelity.val, same_language = T)
-
-i.plot <- iterative |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |>  
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_color_distiller()+
-  scale_fill_distiller()+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story),ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Iterative translations")
-
-# i.plot
-
-## Scattershot ----
-
-multi <- multi_translations(original, n_translations, range.min, range.max, deterministic = F, fidelity = fidelity.val, same_language = T)
-
-m.plot <- multi |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |> 
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_fill_distiller(palette = 2)+
-  scale_color_distiller(palette = 2)+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story), ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Scattershot translations")
-
-# m.plot
-
-full.dtw <- full.dtw |> 
-  rbind(dtw.custom("same","iterative","non-deterministic", n_translations, 
-                   fidelity.val, iterative),
-        dtw.custom("same","scattershot","non-deterministic", n_translations, 
-                   fidelity.val, multi))
-
-i.plot / m.plot+
-  plot_annotation(title = "Same language, non-deterministic", 
-                  subtitle = paste("Fidelity of", fidelity.val), tag_levels = "A")
-
-ggsave(filename = paste0("model.nondeterministic-same-f",fidelity.val,".png"),
-       path = "../figures/model_figures",
-       units = "in",
-       dpi = 300,
-       width = 26,
-       height = 12)
-
-
-
-# Different language, non-deterministic ----
-## Iterative ----
-iterative <- iterate_translation(original, n_translations, range.min, range.max, deterministic = F, fidelity = fidelity.val, same_language = F)
-
-i.plot <- iterative |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |>  
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_color_distiller()+
-  scale_fill_distiller()+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story),ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Iterative translations")
-
-# i.plot
-
-## Scattershot ----
-multi <- multi_translations(original, n_translations, range.min, range.max, deterministic = F, fidelity = fidelity.val, same_language = F)
-
-m.plot <- multi |> 
-  mutate(story = factor(paste("Story", story),
-                        levels = paste("Story", 0:n_translations))) |> 
-  ggplot(aes(x = x, y = y, color = t.new))+
-  geom_path(linewidth = 1)+
-  geom_point(aes(fill = t.new), color = "black", shape = 21)+
-  scale_fill_distiller(palette = 2)+
-  scale_color_distiller(palette = 2)+
-  geom_label(aes(label = label), color = "black")+
-  facet_wrap(~factor(story), ncol = ceiling((n_translations+1)/2))+
-  ggtitle("Scattershot translations")
-
-# m.plot
-
-full.dtw <- full.dtw |> 
-  rbind(dtw.custom("different","iterative","non-deterministic", n_translations, 
-                   fidelity.val, iterative),
-        dtw.custom("different","scattershot","non-deterministic", n_translations, 
-                   fidelity.val, multi))
-
-i.plot / m.plot+
-  plot_annotation(title = "Different languages, non-deterministic", 
-                  subtitle = paste("Fidelity of", fidelity.val), tag_levels = "A")
-
-
-ggsave(filename = paste0("model.nondeterministic-different-f",fidelity.val,".png"),
-       path = "../figures/model_figures",
-       units = "in",
-       dpi = 300,
-       width = 26,
-       height = 12)
 
 # DTW plot ----
 
 full.dtw |> 
   filter(style == "deterministic") |> 
   mutate(language = paste(language, "language")) |> 
-  ggplot(aes(x = iter, y = dtw.distance, color = translation, shape = translation))+
+  ggplot(aes(x = iter, y = dtw.normalizedDistance, 
+             color = translation, shape = translation))+
   geom_point(alpha = 0.75, size = 2)+
   geom_smooth(method = "lm")+
   scale_color_manual(values = c("blue","red"), name = "Translation\ntype")+
@@ -811,7 +398,7 @@ full.dtw |>
   ggtitle("Deterministic translation")
 
 ggsave(filename = paste0("model.dtw-deterministic.png"),
-       path = "../figures/model_figures",
+       path = "figures/model_figures",
        units = "in",
        dpi = 300,
        width = 7,
@@ -821,55 +408,35 @@ full.dtw |>
   filter(style == "non-deterministic") |> 
   mutate(fidelity = factor(fidelity)) |> 
   mutate(language = paste(language, "language")) |> 
-  ggplot(aes(x = iter, y = dtw.distance, 
+  ggplot(aes(x = iter, y = dtw.normalizedDistance, 
              color = fidelity))+
   geom_point(alpha = 0.75, size = 2)+
   geom_smooth(method = "lm")+
-  scale_color_brewer(name = "Fidelity", palette = 3, type = "qual")+
+  scale_color_brewer(name = "Fidelity")+
   facet_grid(translation~language)+
   xlab("Translation order")+
   ylab("Normalized DTW distance")+
-  ggtitle("Non-deterministic translation")
+  ggtitle("Non-deterministic translation")+
+  theme_dark()
 
 ggsave(filename = paste0("model.dtw-non-deterministic.png"),
-       path = "../figures/model_figures",
+       path = "figures/model_figures",
        units = "in",
        dpi = 300,
        width = 7,
        height = 6)
 
-# # Non-deterministic -----
-# 
-# 
-# 
-# iterative.nd <- iterate_translation(original, 4, F, fidelity.val)
-# 
-# i.plot.nd <- iterative.nd |> 
-#   mutate(story = factor(paste("Story", story),
-#                         levels = paste("Story", 0:10))) |> 
-#   ggplot(aes(x = x, y = y, color = t.new))+
-#   geom_path(linewidth = 1)+
-#   geom_point(aes(fill = t.new), color = "black", shape = 21)+
-#   scale_color_distiller()+
-#   scale_fill_distiller()+
-#   geom_label(aes(label = label), color = "black")+
-#   facet_wrap(~factor(story), ncol = 5)+
-#   ggtitle("Stories translated iteratively")
-# 
-# 
-# multi.nd <- multi_translations(original, 4, F, fidelity.val)
-# 
-# m.plot.nd <- multi.nd |> 
-#   mutate(story = factor(paste("Story", story),
-#                         levels = paste("Story", 0:10))) |> 
-#   ggplot(aes(x = x, y = y, color = t.new))+
-#   geom_path(linewidth = 1)+
-#   geom_point(aes(fill = t.new), color = "black", shape = 21)+
-#   scale_fill_distiller(palette = 2)+
-#   scale_color_distiller(palette = 2)+
-#   geom_label(aes(label = label), color = "black")+
-#   facet_wrap(~factor(story), ncol = 5)+
-#   ggtitle("Stories translated with reference to original")
-# 
-# nondeterministic <- m.plot.nd / i.plot.nd
-# nondeterministic
+full.dtw |> 
+  filter(style == "non-deterministic") |> 
+  mutate(fidelity = factor(fidelity)) |> 
+  mutate(language = paste(language, "language")) |> 
+  ggplot(aes(x = iter, y = dtw.distance, 
+             color = fidelity))+
+  geom_point(alpha = 0.75, size = 2)+
+  geom_smooth(method = "lm")+
+  scale_color_brewer(name = "Fidelity")+
+  facet_grid(translation~language)+
+  xlab("Translation order")+
+  ylab("DTW distance (not normalized)")+
+  ggtitle("Non-deterministic translation")+
+  theme_dark()
